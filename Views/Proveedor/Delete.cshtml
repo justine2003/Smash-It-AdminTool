@@ -1,0 +1,36 @@
+@model SGA_Smash.Models.Proveedor
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card rounded-3 border border-danger">
+                <div class="card-body">
+                    <h4 class="card-title mb-4 text-danger">¿Eliminar Proveedor?</h4>
+                    <p class="mb-4">Estás a punto de eliminar el siguiente proveedor. Esta acción no se puede deshacer.</p>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Nombre</dt>
+                        <dd class="col-sm-8">@Model.Nombre</dd>
+
+                        <dt class="col-sm-4">Contacto</dt>
+                        <dd class="col-sm-8">@Model.Contacto</dd>
+
+                        <dt class="col-sm-4">Teléfono</dt>
+                        <dd class="col-sm-8">@Model.Telefono</dd>
+
+                        <dt class="col-sm-4">Correo</dt>
+                        <dd class="col-sm-8">@Model.Correo</dd>
+                    </dl>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

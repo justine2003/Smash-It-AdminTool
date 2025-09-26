@@ -1,0 +1,46 @@
+@model SGA_Smash.Models.Producto
+
+@{
+    ViewData["Title"] = "Eliminar Producto";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3 border border-danger">
+                <div class="card-body">
+                    <h4 class="card-title text-danger">¿Estás seguro que deseas eliminar este producto?</h4>
+                    <p class="card-subtitle mb-4">Esta acción no se puede deshacer.</p>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Nombre</dt>
+                        <dd class="col-sm-8">@Model.Nombre</dd>
+
+                        <dt class="col-sm-4">Unidad de Medida</dt>
+                        <dd class="col-sm-8">@Model.UnidadMedida</dd>
+
+                        <dt class="col-sm-4">Precio Unitario</dt>
+                        <dd class="col-sm-8">₡@Model.PrecioUnitario.ToString("N0")</dd>
+
+                        <dt class="col-sm-4">Precio Entrega (días)</dt>
+                        <dd class="col-sm-8">@Model.PrecioEntregaDias</dd>
+
+                        <dt class="col-sm-4">Stock Actual</dt>
+                        <dd class="col-sm-8">@Model.StockActual</dd>
+
+                        <dt class="col-sm-4">Stock Mínimo</dt>
+                        <dd class="col-sm-8">@Model.MinimoStock</dd>
+                    </dl>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ti ti-trash me-1"></i> Confirmar Eliminación
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

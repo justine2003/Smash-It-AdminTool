@@ -1,0 +1,32 @@
+@model SGA_Smash.Models.Reservacion
+
+<div class="container-fluid">
+    <div class="card rounded-3">
+        <div class="card-body">
+            <h4 class="card-title mb-4 text-danger">¿Eliminar Reservación?</h4>
+
+            <dl class="row">
+                <dt class="col-sm-3">Cliente</dt>
+                <dd class="col-sm-9">@Model.ClienteNombre</dd>
+
+                <dt class="col-sm-3">Fecha y Hora</dt>
+                <dd class="col-sm-9">@Model.FechaHora.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                <dt class="col-sm-3">Mesa</dt>
+                <dd class="col-sm-9">@Model.Mesa</dd>
+
+                <dt class="col-sm-3">Estado</dt>
+                <dd class="col-sm-9">@Model.Estado</dd>
+
+                <dt class="col-sm-3">Registrado por</dt>
+                <dd class="col-sm-9">@Model.RegistradoPor</dd>
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>

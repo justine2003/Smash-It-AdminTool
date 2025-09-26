@@ -1,0 +1,56 @@
+@model IEnumerable<SGA_Smash.Models.Cliente>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <div class="d-md-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="card-title">Clientes Registrados</h4>
+                            <p class="card-subtitle">Lista con datos demostrativos</p>
+                        </div>
+                        <div>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="ti ti-plus me-1"></i> Nuevo Cliente
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
+                            <thead>
+                                <tr>
+                                    <th class="px-0 text-muted">Nombre</th>
+                                    <th class="px-0 text-muted">Correo</th>
+                                    <th class="px-0 text-muted">Teléfono</th>
+                                    <th class="px-0 text-muted">Registrado</th>
+                                    <th class="px-0 text-muted text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cliente in Model)
+                                {
+                                    <tr>
+                                        <td class="px-0">@cliente.Nombre</td>
+                                        <td class="px-0">@cliente.Correo</td>
+                                        <td class="px-0">@cliente.Telefono</td>
+                                        <td class="px-0">@cliente.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                                        <td class="px-0 text-end">
+                                            <a asp-action="Edit" asp-route-id="@cliente.Id" class="btn btn-sm btn-warning me-1">
+                                                <i class="ti ti-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@cliente.Id" class="btn btn-sm btn-danger">
+                                                <i class="ti ti-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

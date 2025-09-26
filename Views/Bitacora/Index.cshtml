@@ -1,0 +1,49 @@
+@model IEnumerable<SGA_Smash.Models.Bitacora>
+
+@{
+    ViewData["Title"] = "Bitácora";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <div class="d-md-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="card-title">Bitácora</h4>
+                            <p class="card-subtitle">Registro de acciones en el sistema</p>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
+                            <thead>
+                                <tr>
+                                    <th class="px-0 text-muted">Usuario</th>
+                                    <th class="px-0 text-muted">Módulo</th>
+                                    <th class="px-0 text-muted">Acción</th>
+                                    <th class="px-0 text-muted">Fecha</th>
+                                    <th class="px-0 text-muted">Detalles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="px-0">@item.Usuario</td>
+                                        <td class="px-0">@item.Modulo</td>
+                                        <td class="px-0">@item.Accion</td>
+                                        <td class="px-0">@item.Fecha.ToString("dd/MM/yyyy")</td>
+                                        <td class="px-0">@item.Detalles</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+@model SGA_Smash.Models.Gasto
+
+@{
+    ViewData["Title"] = "Eliminar Gasto";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <h4 class="card-title text-danger">¿Estás seguro que deseas eliminar este gasto?</h4>
+
+                    <div class="mb-3">
+                        <strong>Tipo:</strong> @Model.Tipo
+                    </div>
+                    <div class="mb-3">
+                        <strong>Monto:</strong> ₡@Model.Monto.ToString("N0")
+                    </div>
+                    <div class="mb-3">
+                        <strong>Descripción:</strong> @Model.Descripcion
+                    </div>
+                    <div class="mb-3">
+                        <strong>Fecha:</strong> @Model.Fecha.ToString("dd/MM/yyyy")
+                    </div>
+                    <div class="mb-3">
+                        <strong>Registrado Por:</strong> @Model.RegistradoPor
+                    </div>
+
+                    <form asp-action="DeleteConfirmed">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ti ti-trash me-1"></i> Eliminar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

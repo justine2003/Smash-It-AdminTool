@@ -1,0 +1,47 @@
+@model SGA_Smash.Models.Planilla
+
+@{
+    ViewData["Title"] = "Editar Planilla";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <h4 class="card-title">Editar Registro de Planilla</h4>
+                    <form asp-action="Edit">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="EmpleadoNombre" class="form-label">Empleado</label>
+                            <select asp-for="EmpleadoNombre" class="form-select" asp-items="ViewBag.Empleados">
+                                <option value="">Seleccione un empleado</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SalarioBase" class="form-label"></label>
+                            <input asp-for="SalarioBase" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Deducciones" class="form-label"></label>
+                            <input asp-for="Deducciones" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Bonificaciones" class="form-label"></label>
+                            <input asp-for="Bonificaciones" class="form-control" />
+                        </div>
+
+                        <button type="submit" class="btn btn-warning">
+                            <i class="ti ti-pencil me-1"></i> Actualizar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

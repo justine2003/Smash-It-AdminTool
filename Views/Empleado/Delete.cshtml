@@ -1,0 +1,39 @@
+@model SGA_Smash.Models.Empleado
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-md-8 offset-md-2">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <h4 class="card-title text-danger mb-4">Confirmar eliminación</h4>
+                    <p class="card-subtitle mb-3">¿Estás seguro de que deseas eliminar este empleado?</p>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Nombre:</dt>
+                        <dd class="col-sm-8">@Model.Nombre</dd>
+
+                        <dt class="col-sm-4">Puesto:</dt>
+                        <dd class="col-sm-8">@Model.Puesto</dd>
+
+                        <dt class="col-sm-4">Salario Base:</dt>
+                        <dd class="col-sm-8">₡@Model.SalarioBase.ToString("N0")</dd>
+
+                        <dt class="col-sm-4">Fecha Ingreso:</dt>
+                        <dd class="col-sm-8">@Model.FechaIngreso.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Estado:</dt>
+                        <dd class="col-sm-8">@Model.Estado</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

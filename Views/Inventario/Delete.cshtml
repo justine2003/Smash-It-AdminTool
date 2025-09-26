@@ -1,0 +1,40 @@
+@model SGA_Smash.Models.Inventario
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <h4 class="card-title mb-4 text-danger">¿Estás seguro de que deseas eliminar este registro?</h4>
+
+                    <div class="mb-3">
+                        <strong>Producto:</strong> @Model.ProductoNombre
+                    </div>
+                    <div class="mb-3">
+                        <strong>Proveedor:</strong> @Model.ProveedorNombre
+                    </div>
+                    <div class="mb-3">
+                        <strong>Cantidad:</strong> @Model.Cantidad
+                    </div>
+                    <div class="mb-3">
+                        <strong>Fecha de Ingreso:</strong> @Model.FechaIngreso.ToString("dd/MM/yyyy")
+                    </div>
+                    <div class="mb-3">
+                        <strong>Estado:</strong> @Model.Estado
+                    </div>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="ti ti-trash me-1"></i> Eliminar
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

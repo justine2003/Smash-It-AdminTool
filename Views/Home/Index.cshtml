@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var empleadosPorRol = (Dictionary<string, int>)ViewBag.EmpleadosPorRol;
+    var gastosMensuales = (Dictionary<string, decimal>)ViewBag.GastosMensuales;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <h4 class="card-title">Distribución de empleados</h4>
+                    <canvas id="empleadosChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <h4 class="card-title">Gastos mensuales</h4>
+                    <canvas id="gastosChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const empleadosChart = new Chart(document.getElementById('empleadosChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(empleadosPorRol.Keys)),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(empleadosPorRol.Values)),
+                    backgroundColor: ['#FF2E2E', '#2A2A2A', '#FFFFFF', '#A6A6A6'],
+                    borderColor: '#000000',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#2A2A2A'
+                        }
+                    }
+                }
+            }
+        });
+
+        const gastosChart = new Chart(document.getElementById('gastosChart'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(gastosMensuales.Keys)),
+                datasets: [{
+                    label: 'Gastos en colones',
+                    data: @Html.Raw(Json.Serialize(gastosMensuales.Values)),
+                    backgroundColor: '#FF2E2E',
+                    borderColor: '#2A2A2A',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#2A2A2A'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#2A2A2A'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+}

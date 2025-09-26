@@ -1,0 +1,76 @@
+@model IEnumerable<SGA_Smash.Models.Vacacion>
+
+@{
+    ViewData["Title"] = "Vacaciones";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    <div class="d-md-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="card-title">Vacaciones Registradas</h4>
+                            <p class="card-subtitle">Lista de vacaciones otorgadas al personal</p>
+                        </div>
+                        <div>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="ti ti-plus me-1"></i> Nueva Vacación
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
+                            <thead>
+                                <tr>
+                                    <th class="px-0 text-muted">Empleado</th>
+                                    <th class="px-0 text-muted">Desde</th>
+                                    <th class="px-0 text-muted">Hasta</th>
+                                    <th class="px-0 text-muted">Días</th>
+                                    <th class="px-0 text-muted">Estado</th>
+                                    <th class="px-0 text-muted text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var vacacion in Model)
+                                {
+                                    <tr>
+                                        <td class="px-0">@vacacion.EmpleadoNombre</td>
+                                        <td class="px-0">@vacacion.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                        <td class="px-0">@vacacion.FechaFin.ToString("dd/MM/yyyy")</td>
+                                        <td class="px-0">@vacacion.Dias</td>
+                                        <td class="px-0">
+                                            @if (vacacion.Estado == "Aprobada")
+                                            {
+                                                <span class="badge bg-success">Aprobada</span>
+                                            }
+                                            else if (vacacion.Estado == "Pendiente")
+                                            {
+                                                <span class="badge bg-warning">Pendiente</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Rechazada</span>
+                                            }
+                                        </td>
+                                        <td class="px-0 text-end">
+                                            <a asp-action="Edit" asp-route-id="@vacacion.Id" class="btn btn-sm btn-warning me-1">
+                                                <i class="ti ti-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@vacacion.Id" class="btn btn-sm btn-danger">
+                                                <i class="ti ti-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

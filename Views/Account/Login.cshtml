@@ -1,0 +1,107 @@
+@model SGA_Smash.Models.LoginViewModel
+
+@{
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iniciar Sesión - SGA Smash</title>
+
+    <link rel="shortcut icon" href="~/assets/images/logos/smashlogo.svg" />
+
+    <link rel="stylesheet" href="~/assets/css/styles.min.css" />
+    <style>
+        body {
+            position: relative;
+            background-image: url('/assets/images/backgrounds/hamburguer.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Botón rojo Smash */
+        .btn-smash-red {
+            background-color: #FF2E2E;
+            color: white;
+        }
+
+        .btn-smash-red:hover {
+            background-color: #e62828;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrapper" id="main-wrapper">
+        <div class="position-relative min-vh-100 d-flex align-items-center justify-content-center">
+            <div class="row justify-content-center w-100 px-3">
+                <div class="col-md-8 col-lg-6 col-xxl-3">
+                    <div class="card glass-card mb-0">
+                        <div class="card-body">
+                            <a href="~/Home/Index" class="text-nowrap logo-img text-center d-block py-3 w-100">
+                                <img src="~/assets/images/logos/smashlogo.svg" width="150" alt="logo" />
+                            </a>
+                            <p class="text-center text-white">Inicie sesión en el sistema</p>
+
+                            <form asp-action="Login" asp-controller="Account" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label text-white">Usuario</label>
+                                    <input asp-for="Usuario" class="form-control" />
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label text-white">Contraseña</label>
+                                    <input asp-for="Contrasena" type="password" class="form-control" />
+                                </div>
+                                <button type="submit"
+                                    class="btn btn-smash-red w-100 py-8 fs-4 mb-4 rounded-2">Ingresar</button>
+
+                                @if (ViewBag.Mensaje != null)
+                                {
+                                    <div class="alert alert-danger text-center">@ViewBag.Mensaje</div>
+                                }
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/assets/libs/jquery/jquery.min.js"></script>
+    <script src="~/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+@model SGA_Smash.Models.Reservacion
+
+<div class="container-fluid">
+    <div class="card rounded-3">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Editar Reservación</h4>
+
+            <form asp-action="Edit">
+                <input type="hidden" asp-for="Id" />
+                <div class="mb-3">
+                    <label asp-for="ClienteNombre" class="form-label">Cliente</label>
+                    <input asp-for="ClienteNombre" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FechaHora" class="form-label">Fecha y Hora</label>
+                    <input asp-for="FechaHora" type="datetime-local" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Mesa" class="form-label">Mesa</label>
+                    <input asp-for="Mesa" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Estado" class="form-label">Estado</label>
+                    <select asp-for="Estado" class="form-select">
+                        <option>Confirmada</option>
+                        <option>Pendiente</option>
+                        <option>Cancelada</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="RegistradoPor" class="form-label">Registrado por</label>
+                    <select asp-for="RegistradoPor" class="form-select" asp-items="new SelectList(ViewBag.Empleados)">
+                        <option value="">-- Selecciona --</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>

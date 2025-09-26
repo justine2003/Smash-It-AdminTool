@@ -1,0 +1,45 @@
+@model SGA_Smash.Models.Planilla
+
+@{
+    ViewData["Title"] = "Eliminar Planilla";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3 border-danger">
+                <div class="card-body">
+                    <h4 class="card-title text-danger">¿Estás seguro de eliminar este registro de planilla?</h4>
+
+                    <dl class="row mt-4">
+                        <dt class="col-sm-3">Empleado</dt>
+                        <dd class="col-sm-9">@Model.EmpleadoNombre</dd>
+
+                        <dt class="col-sm-3">Salario Base</dt>
+                        <dd class="col-sm-9">₡@Model.SalarioBase.ToString("N2")</dd>
+
+                        <dt class="col-sm-3">Deducciones</dt>
+                        <dd class="col-sm-9">₡@Model.Deducciones.ToString("N2")</dd>
+
+                        <dt class="col-sm-3">Bonificaciones</dt>
+                        <dd class="col-sm-9">₡@Model.Bonificaciones.ToString("N2")</dd>
+
+                        <dt class="col-sm-3">Total Pago</dt>
+                        <dd class="col-sm-9">₡@Model.TotalPago.ToString("N2")</dd>
+
+                        <dt class="col-sm-3">Fecha de Pago</dt>
+                        <dd class="col-sm-9">@Model.FechaPago.ToString("dd/MM/yyyy")</dd>
+                    </dl>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ti ti-trash me-1"></i> Eliminar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
