@@ -12,6 +12,12 @@ namespace SGA_Smash.Data
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Empleado> Empleados { get; set; }
 
+        public DbSet<Producto> Producto { get; set; }
+        public DbSet<Proveedor> Proveedore { get; set; }
+        public DbSet<Inventario> Inventario { get; set; }
+        public DbSet<Categoria> Categoria { get; set; }
+        public DbSet<Usuario> Usuario { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

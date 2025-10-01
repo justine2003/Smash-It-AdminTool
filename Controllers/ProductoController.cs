@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using SGA_Smash.Data;
 using SGA_Smash.Models;
 using System.Linq;
 
@@ -6,57 +9,76 @@ namespace SGA_Smash.Controllers;
 
 public class ProductoController : Controller
 {
-    private static List<Producto> productos = new List<Producto>
+    private readonly ApplicationDbContext _context;
+
+    public ProductoController(ApplicationDbContext context)
     {
-        new Producto { Id = 1, Nombre = "Harina", UnidadMedida = "kg", PrecioUnitario = 1200, PrecioEntregaDias = 3, StockActual = 45, MinimoStock = 10 },
-        new Producto { Id = 2, Nombre = "Aceite vegetal", UnidadMedida = "L", PrecioUnitario = 2000, PrecioEntregaDias = 2, StockActual = 20, MinimoStock = 5 },
-        new Producto { Id = 3, Nombre = "Salsa de tomate", UnidadMedida = "unidad", PrecioUnitario = 750, PrecioEntregaDias = 5, StockActual = 80, MinimoStock = 20 }
-    };
+        _context = context;
+    }
 
     public IActionResult Index()
     {
+        var productos = _context.Producto.Include(p => p.Categoria).ToList();
+
         return View(productos);
     }
 
     public IActionResult Create()
     {
+        ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre");
         return View();
     }
 
     [HttpPost]
     public IActionResult Create(Producto nuevo)
     {
-        nuevo.Id = productos.Max(p => p.Id) + 1;
-        productos.Add(nuevo);
-        return RedirectToAction("Index");
+        if (ModelState.IsValid)
+        {
+            _context.Producto.Add(nuevo);
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", nuevo.CategoriaId);
+        return View("Create", nuevo);
     }
 
     public IActionResult Edit(int id)
     {
-        var producto = productos.FirstOrDefault(p => p.Id == id);
-        if (producto == null) return NotFound();
+        var producto = _context.Producto.Include(p => p.Categoria).FirstOrDefault(p => p.Id == id);
+        if (producto == null) return NotFound();          
+
+        ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", producto.CategoriaId);
         return View(producto);
     }
 
     [HttpPost]
     public IActionResult Edit(int id, Producto actualizado)
     {
-        var producto = productos.FirstOrDefault(p => p.Id == id);
+        var producto = _context.Producto.FirstOrDefault(p => p.Id == id);
         if (producto == null) return NotFound();
 
-        producto.Nombre = actualizado.Nombre;
-        producto.UnidadMedida = actualizado.UnidadMedida;
-        producto.PrecioUnitario = actualizado.PrecioUnitario;
-        producto.PrecioEntregaDias = actualizado.PrecioEntregaDias;
-        producto.StockActual = actualizado.StockActual;
-        producto.MinimoStock = actualizado.MinimoStock;
+        if (ModelState.IsValid) 
+        {
+            producto.Nombre = actualizado.Nombre;
+            producto.UnidadMedida = actualizado.UnidadMedida;
+            producto.PrecioUnitario = actualizado.PrecioUnitario;
+            producto.PrecioEntregaDias = actualizado.PrecioEntregaDias;
+            producto.StockActual = actualizado.StockActual;
+            producto.MinimoStock = actualizado.MinimoStock;
+            producto.CategoriaId = actualizado.CategoriaId;
 
-        return RedirectToAction("Index");
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", actualizado.CategoriaId);
+        return View(actualizado);
     }
 
     public IActionResult Delete(int id)
     {
-        var producto = productos.FirstOrDefault(p => p.Id == id);
+        var producto = _context.Producto.FirstOrDefault(p => p.Id == id);
         if (producto == null) return NotFound();
         return View(producto);
     }
@@ -64,10 +86,10 @@ public class ProductoController : Controller
     [HttpPost, ActionName("Delete")]
     public IActionResult DeleteConfirmed(int id)
     {
-        var producto = productos.FirstOrDefault(p => p.Id == id);
+        var producto = _context.Producto.FirstOrDefault(p => p.Id == id);
         if (producto == null) return NotFound();
 
-        productos.Remove(producto);
+        _context.Producto.Remove(producto);
         return RedirectToAction("Index");
     }
 }

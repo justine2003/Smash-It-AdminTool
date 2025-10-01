@@ -109,14 +109,23 @@ CREATE TABLE Proveedor (
     correo VARCHAR(100)
 );
 
--- Tabla Producto
+-- La Tabla Categoria
+CREATE TABLE Categoria (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Tabla Productos
 CREATE TABLE Producto (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    nombre VARCHAR(100) NOT NULL,
-    unidad_medida VARCHAR(50),
-    precio_unitario DECIMAL(10, 2),
-    stock_actual DECIMAL(10, 2),
-    minimo_stock DECIMAL(10, 2)
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Nombre VARCHAR(100) NOT NULL,
+    UnidadMedida VARCHAR(50),
+    PrecioUnitario DECIMAL(10, 2),
+    PrecioEntregaDias DECIMAL(10, 2),
+    StockActual INT,
+    MinimoStock INT,
+    CategoriaId INT, 
+   FOREIGN KEY (CategoriaId) REFERENCES Categoria(Id)
 );
 
 -- Tabla Producto_Proveedor
