@@ -1,82 +1,118 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Models;
+using SGA_Smash.Repositories;
 
-namespace SGA_Smash.Controllers;
-
-public class PlanillaController : Controller
+namespace SGA_Smash.Controllers
 {
-    private static List<Empleado> empleados = new List<Empleado>
+    public class PlanillaController : Controller
     {
-        new Empleado { Id = 1, Nombre = "Carlos Soto", Puesto = "Cocinero", SalarioBase = 450000, FechaIngreso = new DateTime(2022, 3, 15), Estado = "Activo" },
-        new Empleado { Id = 2, Nombre = "Andrea Gómez", Puesto = "Mesera", SalarioBase = 350000, FechaIngreso = new DateTime(2023, 1, 10), Estado = "Activo" },
-        new Empleado { Id = 3, Nombre = "Luis Mora", Puesto = "Cajero", SalarioBase = 400000, FechaIngreso = new DateTime(2021, 9, 5), Estado = "Inactivo" }
-    };
+        private readonly IPlanillaRepository _planillaRepository;
+        private readonly IEmpleadoRepository _empleadoRepository;
 
-    private static List<Planilla> planillas = new List<Planilla>
-    {
-        new Planilla { Id = 1, EmpleadoNombre = "Carlos Mora", SalarioBase = 450000, Deducciones = 25000, Bonificaciones = 10000, FechaPago = new DateTime(2024, 8, 15) },
-        new Planilla { Id = 2, EmpleadoNombre = "Andrea Gómez", SalarioBase = 350000, Deducciones = 15000, Bonificaciones = 5000, FechaPago = new DateTime(2024, 8, 15) }
-    };
+        public PlanillaController(IPlanillaRepository planillaRepository, IEmpleadoRepository empleadoRepository)
+        {
+            _planillaRepository = planillaRepository;
+            _empleadoRepository = empleadoRepository;
+        }
 
-    public IActionResult Index()
-    {
-        return View(planillas);
-    }
+        private async Task LoadEmpleadosAsync(int? selectedId = null)
+        {
+            var empleados = await _empleadoRepository.GetAllEmpleadosAsync();
+            ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre", selectedId);
+        }
 
-    public IActionResult Create()
-    {
-        ViewBag.Empleados = new SelectList(empleados, "Nombre", "Nombre");
-        return View();
-    }
+        public async Task<IActionResult> Index()
+        {
+            var planillas = await _planillaRepository.GetAllAsync();
+            return View(planillas);
+        }
 
-    [HttpPost]
-    public IActionResult Create(Planilla nueva)
-    {
-        nueva.Id = planillas.Max(p => p.Id) + 1;
-        nueva.FechaPago = DateTime.Now;
-        planillas.Add(nueva);
-        return RedirectToAction("Index");
-    }
+        public async Task<IActionResult> Details(int id)
+        {
+            var planilla = await _planillaRepository.GetByIdAsync(id);
+            if (planilla == null) return NotFound();
+            return View(planilla);
+        }
 
-    public IActionResult Edit(int id)
-    {
-        var planilla = planillas.FirstOrDefault(p => p.Id == id);
-        if (planilla == null) return NotFound();
+        public async Task<IActionResult> Create()
+        {
+            await LoadEmpleadosAsync();
+            return View();
+        }
 
-        ViewBag.Empleados = new SelectList(empleados, "Nombre", "Nombre", planilla.EmpleadoNombre);
-        return View(planilla);
-    }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Planilla planilla)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadEmpleadosAsync(planilla.EmpleadoId);
+                return View(planilla);
+            }
 
-    [HttpPost]
-    public IActionResult Edit(int id, Planilla actualizada)
-    {
-        var planilla = planillas.FirstOrDefault(p => p.Id == id);
-        if (planilla == null) return NotFound();
+            await _planillaRepository.AddAsync(planilla);
+            TempData["Success"] = "Planilla registrada con éxito.";
+            return RedirectToAction(nameof(Index));
+        }
 
-        planilla.EmpleadoNombre = actualizada.EmpleadoNombre;
-        planilla.SalarioBase = actualizada.SalarioBase;
-        planilla.Deducciones = actualizada.Deducciones;
-        planilla.Bonificaciones = actualizada.Bonificaciones;
-        // FechaPago no se modifica en edit
+        public async Task<IActionResult> Edit(int id)
+        {
+            var planilla = await _planilla_repository_Get(id);
+            if (planilla == null) return NotFound();
 
-        return RedirectToAction("Index");
-    }
+            await LoadEmpleadosAsync(planilla.EmpleadoId);
+            return View(planilla);
+        }
 
-    public IActionResult Delete(int id)
-    {
-        var planilla = planillas.FirstOrDefault(p => p.Id == id);
-        if (planilla == null) return NotFound();
-        return View(planilla);
-    }
+        private async Task<Planilla?> _planilla_repository_Get(int id)
+        {
+            return await _planillaRepository.GetByIdAsync(id);
+        }
 
-    [HttpPost, ActionName("Delete")]
-    public IActionResult DeleteConfirmed(int id)
-    {
-        var planilla = planillas.FirstOrDefault(p => p.Id == id);
-        if (planilla == null) return NotFound();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Planilla planilla)
+        {
+            if (id != planilla.Id) return NotFound();
 
-        planillas.Remove(planilla);
-        return RedirectToAction("Index");
+            if (!ModelState.IsValid)
+            {
+                await LoadEmpleadosAsync(planilla.EmpleadoId);
+                return View(planilla);
+            }
+
+            try
+            {
+                await _planillaRepository.UpdateAsync(planilla);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await _planillaRepository.ExistsAsync(planilla.Id))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            TempData["Success"] = "Planilla actualizada con éxito.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var planilla = await _planillaRepository.GetByIdAsync(id);
+            if (planilla == null) return NotFound();
+            return View(planilla);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _planillaRepository.DeleteAsync(id);
+            TempData["Success"] = "Planilla eliminada con éxito.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
