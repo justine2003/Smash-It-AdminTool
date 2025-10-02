@@ -5,29 +5,55 @@
         <div class="col-12 col-lg-8 mx-auto">
             <div class="card rounded-3">
                 <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Success"]</div>
+                    }
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-warning">
+                            <strong>Errores de validación:</strong>
+                            <ul>
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
                     <h4 class="card-title mb-4">Editar Proveedor</h4>
 
-                    <form asp-action="Edit">
+                    <form asp-action="Edit" method="post">
                         <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="mb-3">
-                            <label asp-for="Nombre" class="form-label">Nombre</label>
-                            <input asp-for="Nombre" class="form-control" />
+                            <label asp-for="Nombre" class="form-label">Nombre del Proveedor *</label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ej: Distribuidora Central" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Contacto" class="form-label">Nombre del Contacto</label>
-                            <input asp-for="Contacto" class="form-control" />
+                            <input asp-for="Contacto" class="form-control" placeholder="Ej: Mario López" />
+                            <span asp-validation-for="Contacto" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Telefono" class="form-label">Teléfono</label>
-                            <input asp-for="Telefono" class="form-control" />
+                            <input asp-for="Telefono" class="form-control" placeholder="Ej: 8888-1111" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Correo" class="form-label">Correo Electrónico</label>
-                            <input asp-for="Correo" class="form-control" />
+                            <input asp-for="Correo" type="email" class="form-control" placeholder="Ej: contacto@proveedor.com" />
+                            <span asp-validation-for="Correo" class="text-danger"></span>
                         </div>
 
                         <div class="d-flex justify-content-end">
@@ -40,3 +66,9 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

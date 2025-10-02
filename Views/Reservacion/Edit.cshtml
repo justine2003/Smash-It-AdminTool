@@ -8,8 +8,8 @@
             <form asp-action="Edit">
                 <input type="hidden" asp-for="Id" />
                 <div class="mb-3">
-                    <label asp-for="ClienteNombre" class="form-label">Cliente</label>
-                    <input asp-for="ClienteNombre" class="form-control" />
+                    <label asp-for="Cliente" class="form-label">Cliente</label>
+                    <input asp-for="Cliente" class="form-control" />
                 </div>
                 <div class="mb-3">
                     <label asp-for="FechaHora" class="form-label">Fecha y Hora</label>
@@ -27,12 +27,7 @@
                         <option>Cancelada</option>
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="RegistradoPor" class="form-label">Registrado por</label>
-                    <select asp-for="RegistradoPor" class="form-select" asp-items="new SelectList(ViewBag.Empleados)">
-                        <option value="">-- Selecciona --</option>
-                    </select>
-                </div>
+               
                 <button type="submit" class="btn btn-warning">Actualizar</button>
                 <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </form>

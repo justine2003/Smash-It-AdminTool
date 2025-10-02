@@ -1,4 +1,4 @@
-﻿@model SGA_Smash.Models.Producto
+@model SGA_Smash.Models.Producto
 
 @{
     ViewData["Title"] = "Editar Producto";
@@ -41,15 +41,6 @@
                         <div class="mb-3">
                             <label asp-for="MinimoStock" class="form-label"></label>
                             <input asp-for="MinimoStock" class="form-control" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Categoria" class="form-label"></label>
-                            <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.CategoriaId">
-                                <option value="">-- Seleccionar Categoria --</option>
-                            </select>
-
-                            <span asp-validation-for="CategoriaId" class="text-danger"></span>
                         </div>
 
                         <button type="submit" class="btn btn-warning">

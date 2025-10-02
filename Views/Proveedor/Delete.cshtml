@@ -2,31 +2,59 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12 col-lg-8 mx-auto">
-            <div class="card rounded-3 border border-danger">
+        <div class="col-12 col-lg-6 mx-auto">
+            <div class="card rounded-3">
                 <div class="card-body">
-                    <h4 class="card-title mb-4 text-danger">¿Eliminar Proveedor?</h4>
-                    <p class="mb-4">Estás a punto de eliminar el siguiente proveedor. Esta acción no se puede deshacer.</p>
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
 
-                    <dl class="row">
-                        <dt class="col-sm-4">Nombre</dt>
-                        <dd class="col-sm-8">@Model.Nombre</dd>
+                    <div class="text-center mb-4">
+                        <i class="ti ti-alert-triangle text-warning" style="font-size: 4rem;"></i>
+                        <h4 class="card-title mt-3">¿Eliminar Proveedor?</h4>
+                        <p class="text-muted">Esta acción no se puede deshacer.</p>
+                    </div>
 
-                        <dt class="col-sm-4">Contacto</dt>
-                        <dd class="col-sm-8">@Model.Contacto</dd>
+                    <div class="alert alert-warning">
+                        <h6><i class="ti ti-info-circle me-2"></i>Información del Proveedor</h6>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Nombre:</strong></div>
+                            <div class="col-sm-8">@Model.Nombre</div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Contacto))
+                        {
+                            <div class="row mt-2">
+                                <div class="col-sm-4"><strong>Contacto:</strong></div>
+                                <div class="col-sm-8">@Model.Contacto</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Telefono))
+                        {
+                            <div class="row mt-2">
+                                <div class="col-sm-4"><strong>Teléfono:</strong></div>
+                                <div class="col-sm-8">@Model.Telefono</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Correo))
+                        {
+                            <div class="row mt-2">
+                                <div class="col-sm-4"><strong>Correo:</strong></div>
+                                <div class="col-sm-8">@Model.Correo</div>
+                            </div>
+                        }
+                    </div>
 
-                        <dt class="col-sm-4">Teléfono</dt>
-                        <dd class="col-sm-8">@Model.Telefono</dd>
-
-                        <dt class="col-sm-4">Correo</dt>
-                        <dd class="col-sm-8">@Model.Correo</dd>
-                    </dl>
-
-                    <form asp-action="Delete">
+                    <form asp-action="Delete" method="post">
                         <input type="hidden" asp-for="Id" />
-                        <div class="d-flex justify-content-end">
-                            <a asp-action="Index" class="btn btn-secondary me-2">Cancelar</a>
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="ti ti-x me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="ti ti-trash me-1"></i> Eliminar
+                            </button>
                         </div>
                     </form>
                 </div>

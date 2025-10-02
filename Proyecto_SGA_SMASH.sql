@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS Proyecto_SGA_SMASH;
 CREATE DATABASE Proyecto_SGA_SMASH;
 USE Proyecto_SGA_SMASH;
 
@@ -109,23 +110,14 @@ CREATE TABLE Proveedor (
     correo VARCHAR(100)
 );
 
--- La Tabla Categoria
-CREATE TABLE Categoria (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    Nombre VARCHAR(100) NOT NULL UNIQUE
-);
-
--- Tabla Productos
+-- Tabla Producto
 CREATE TABLE Producto (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    Nombre VARCHAR(100) NOT NULL,
-    UnidadMedida VARCHAR(50),
-    PrecioUnitario DECIMAL(10, 2),
-    PrecioEntregaDias DECIMAL(10, 2),
-    StockActual INT,
-    MinimoStock INT,
-    CategoriaId INT, 
-   FOREIGN KEY (CategoriaId) REFERENCES Categoria(Id)
+    id INT PRIMARY KEY IDENTITY(1,1),
+    nombre VARCHAR(100) NOT NULL,
+    unidad_medida VARCHAR(50),
+    precio_unitario DECIMAL(10, 2),
+    stock_actual DECIMAL(10, 2),
+    minimo_stock DECIMAL(10, 2)
 );
 
 -- Tabla Producto_Proveedor
@@ -153,3 +145,11 @@ CREATE TABLE Inventario (
     FOREIGN KEY (registrado_por) REFERENCES Usuario(id),
     FOREIGN KEY (producto_id) REFERENCES Producto(id)
 );
+INSERT INTO Roles (nombre, descripcion)
+VALUES ('Administrador', 'Rol con acceso completo al sistema');
+
+INSERT INTO Usuario (nombre, correo, rol_id, contrasena, fecha_creacion, ultimo_acceso)
+VALUES ('Admin', 'admin@smash.com', 1, '123456', GETDATE(), GETDATE());
+
+INSERT INTO Cliente (nombre, correo, telefono, FechaRegistro)
+VALUES ('Cliente Demo', 'demo@correo.com', '555-0000', GETDATE());

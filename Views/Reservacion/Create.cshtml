@@ -1,40 +1,85 @@
 @model SGA_Smash.Models.Reservacion
 
 <div class="container-fluid">
-    <div class="card rounded-3">
-        <div class="card-body">
-            <h4 class="card-title mb-4">Nueva Reservación</h4>
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-warning">
+                            <strong>Errores de validación:</strong>
+                            <ul>
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Success"]</div>
+                    }
+                    <h4 class="card-title">Agregar Reservación</h4>
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <form asp-action="Create">
-                <div class="mb-3">
-                    <label asp-for="ClienteNombre" class="form-label">Cliente</label>
-                    <input asp-for="ClienteNombre" class="form-control" />
+                        <!-- Cliente -->
+                        <div class="mb-3">
+                            <label asp-for="ClienteId" class="form-label">Cliente</label>
+                            <select asp-for="ClienteId" class="form-select"
+                                    asp-items="@(new SelectList(ViewBag.Clientes, "Id", "Nombre"))">
+                                <option value="">-- Selecciona Cliente --</option>
+                            </select>
+                            <span asp-validation-for="ClienteId" class="text-danger"></span>
+                        </div>
+
+
+
+                        <!-- Fecha y hora -->
+                        <div class="mb-3">
+                            <label asp-for="FechaHora" class="form-label">Fecha y Hora</label>
+                            <input asp-for="FechaHora" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="FechaHora" class="text-danger"></span>
+                        </div>
+
+                        <!-- Mesa -->
+                        <div class="mb-3">
+                            <label asp-for="Mesa" class="form-label">Mesa</label>
+                            <input asp-for="Mesa" class="form-control" />
+                            <span asp-validation-for="Mesa" class="text-danger"></span>
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="mb-3">
+                            <label asp-for="Estado" class="form-label">Estado</label>
+                            <select asp-for="Estado" class="form-select">
+                                <option value="Confirmada">Confirmada</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                            <span asp-validation-for="Estado" class="text-danger"></span>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+                        </div>
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="FechaHora" class="form-label">Fecha y Hora</label>
-                    <input asp-for="FechaHora" type="datetime-local" class="form-control" />
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Mesa" class="form-label">Mesa</label>
-                    <input asp-for="Mesa" class="form-control" />
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Estado" class="form-label">Estado</label>
-                    <select asp-for="Estado" class="form-select">
-                        <option>Confirmada</option>
-                        <option>Pendiente</option>
-                        <option>Cancelada</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="RegistradoPor" class="form-label">Registrado por</label>
-                    <select asp-for="RegistradoPor" class="form-select" asp-items="new SelectList(ViewBag.Empleados)">
-                        <option value="">-- Selecciona --</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
