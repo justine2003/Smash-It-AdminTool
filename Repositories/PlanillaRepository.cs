@@ -1,41 +1,36 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using SGA_Smash.Data;
 using SGA_Smash.Models;
+
 
 namespace SGA_Smash.Repositories
 {
     public class PlanillaRepository : IPlanillaRepository
     {
-        private readonly DbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public PlanillaRepository(DbContext context)
+        public PlanillaRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
         public async Task<IEnumerable<Planilla>> GetAllAsync()
         {
-            return await _context.Set<Planilla>()
-                .Include(p => p.Empleado) // si tienes navegación
+            return await _context.Planillas
                 .AsNoTracking()
-                .OrderByDescending(p => p.Anio).ThenByDescending(p => p.Mes)
-                .ThenBy(p => p.EmpleadoId)
                 .ToListAsync();
         }
 
         public async Task<Planilla?> GetByIdAsync(int id)
         {
-            return await _context.Set<Planilla>()
-                .Include(p => p.Empleado)
+            return await _context.Planillas
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task AddAsync(Planilla planilla)
         {
-            await _context.Set<Planilla>().AddAsync(planilla);
+            _context.Planillas.Add(planilla);
             await _context.SaveChangesAsync();
         }
 
@@ -47,17 +42,17 @@ namespace SGA_Smash.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var entity = await _context.Set<Planilla>().FindAsync(id);
+            var entity = await _context.Planillas.FindAsync(id);
             if (entity != null)
             {
-                _context.Set<Planilla>().Remove(entity);
+                _context.Planillas.Remove(entity);
                 await _context.SaveChangesAsync();
             }
         }
 
         public async Task<bool> ExistsAsync(int id)
         {
-            return await _context.Set<Planilla>().AnyAsync(e => e.Id == id);
+            return await _context.Planillas.AnyAsync(e => e.Id == id);
         }
     }
 }
