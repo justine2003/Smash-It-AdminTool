@@ -40,6 +40,12 @@
                             <label asp-for="MinimoStock" class="form-label"></label>
                             <input asp-for="MinimoStock" class="form-control" />
                         </div>
+                        <div class="mb-3">
+                            <label asp-for="Categoria" class="form-label"></label>
+                            <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.CategoriaId">
+                                <option value="">-- Seleccione una categoría --</option>
+                            </select>
+                        </div>
 
                         <button type="submit" class="btn btn-primary">
                             <i class="ti ti-plus me-1"></i> Guardar

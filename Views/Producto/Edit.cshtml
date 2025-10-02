@@ -43,6 +43,15 @@
                             <input asp-for="MinimoStock" class="form-control" />
                         </div>
 
+                        <div class="mb-3">
+                            <label asp-for="Categoria" class="form-label"></label>
+                            <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.CategoriaId">
+                                <option value="">-- Seleccionar Categoria --</option>
+                            </select>
+
+                            <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                        </div>
+
                         <button type="submit" class="btn btn-warning">
                             <i class="ti ti-pencil me-1"></i> Guardar Cambios
                         </button>
