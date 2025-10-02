@@ -3,6 +3,7 @@ namespace SGA_Smash.Models;
 public class Producto
 {
     public int Id { get; set; }
+    public int ProveedorId { get; set; }
     public string Nombre { get; set; }
     public string UnidadMedida { get; set; }
     public decimal PrecioUnitario { get; set; }
@@ -10,7 +11,10 @@ public class Producto
     public int StockActual { get; set; }
     public int MinimoStock { get; set; }
     public int CategoriaId { get; set; }
+    public DateTime Fecha_movimiento { get; set; }
+    public string Estado { get; set; }
 
 
     public Categoria? Categoria { get; set; }
+    public Proveedor? Proveedor { get; set; }
 }

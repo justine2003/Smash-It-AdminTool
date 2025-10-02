@@ -18,7 +18,7 @@ public class ProductoController : Controller
 
     public IActionResult Index()
     {
-        var productos = _context.Producto.Include(p => p.Categoria).ToList();
+        var productos = _context.Producto.Include(p => p.Categoria).ToList(); 
 
         return View(productos);
     }
@@ -26,6 +26,7 @@ public class ProductoController : Controller
     public IActionResult Create()
     {
         ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre");
+        ViewBag.ProveedorID = new SelectList(_context.Proveedor, "Id", "Nombre");
         return View();
     }
 
@@ -40,15 +41,16 @@ public class ProductoController : Controller
         }
 
         ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", nuevo.CategoriaId);
+        ViewBag.ProveedorID = new SelectList(_context.Proveedor, "Id", "Nombre", nuevo.ProveedorId);
         return View("Create", nuevo);
     }
 
     public IActionResult Edit(int id)
     {
         var producto = _context.Producto.Include(p => p.Categoria).FirstOrDefault(p => p.Id == id);
-        if (producto == null) return NotFound();
 
         ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", producto.CategoriaId);
+        ViewBag.ProveedorID = new SelectList(_context.Proveedor, "Id", "Nombre", producto.ProveedorId);
         return View(producto);
     }
 
@@ -61,12 +63,15 @@ public class ProductoController : Controller
         if (ModelState.IsValid)
         {
             producto.Nombre = actualizado.Nombre;
+            producto.ProveedorId = actualizado.ProveedorId;
             producto.UnidadMedida = actualizado.UnidadMedida;
             producto.PrecioUnitario = actualizado.PrecioUnitario;
             producto.PrecioEntregaDias = actualizado.PrecioEntregaDias;
             producto.StockActual = actualizado.StockActual;
             producto.MinimoStock = actualizado.MinimoStock;
             producto.CategoriaId = actualizado.CategoriaId;
+            producto.Fecha_movimiento = actualizado.Fecha_movimiento;
+            producto.Estado = actualizado.Estado;
 
             _context.SaveChanges();
             return RedirectToAction("Index");
@@ -74,6 +79,18 @@ public class ProductoController : Controller
 
         ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", actualizado.CategoriaId);
         return View(actualizado);
+    }
+
+    public IActionResult Detail(int id) 
+    {
+        var producto = _context.Producto
+            .Include(p => p.Categoria)
+            .Include(p => p.Proveedor)
+            .FirstOrDefault(p => p.Id == id);
+
+        ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", producto.CategoriaId);
+        ViewBag.ProveedorID = new SelectList(_context.Proveedor, "Id", "Nombre", producto.ProveedorId);
+        return View(producto);
     }
 
     public IActionResult Delete(int id)

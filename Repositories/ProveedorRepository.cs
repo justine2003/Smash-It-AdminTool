@@ -15,17 +15,17 @@ namespace SGA_Smash.Repositories
 
         public async Task<IEnumerable<Proveedor>> GetAllProveedores()
         {
-            return await _context.Proveedores.ToListAsync();
+            return await _context.Proveedor.ToListAsync();
         }
 
         public async Task<Proveedor> GetProveedorById(int id)
         {
-            return await _context.Proveedores.FindAsync(id);
+            return await _context.Proveedor.FindAsync(id);
         }
 
         public async Task AddProveedor(Proveedor proveedor)
         {
-            _context.Proveedores.Add(proveedor);
+            _context.Proveedor.Add(proveedor);
             await _context.SaveChangesAsync();
         }
 
@@ -37,17 +37,17 @@ namespace SGA_Smash.Repositories
 
         public async Task DeleteProveedor(int id)
         {
-            var proveedor = await _context.Proveedores.FindAsync(id);
+            var proveedor = await _context.Proveedor.FindAsync(id);
             if (proveedor != null)
             {
-                _context.Proveedores.Remove(proveedor);
+                _context.Proveedor.Remove(proveedor);
                 await _context.SaveChangesAsync();
             }
         }
 
         public async Task<bool> ProveedorExists(int id)
         {
-            return await _context.Proveedores.AnyAsync(e => e.Id == id);
+            return await _context.Proveedor.AnyAsync(e => e.Id == id);
         }
     }
 }

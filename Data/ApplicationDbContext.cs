@@ -12,7 +12,7 @@ namespace SGA_Smash.Data
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<Reservacion> Reservaciones { get; set; }
-        public DbSet<Proveedor> Proveedores { get; set; }
+        public DbSet<Proveedor> Proveedor { get; set; }
         public DbSet<Producto> Producto { get; set; }
         public DbSet<Inventario> Inventario { get; set; }
         public DbSet<Categoria> Categoria { get; set; }
