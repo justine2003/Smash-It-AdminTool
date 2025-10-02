@@ -1,51 +1,95 @@
 @model SGA_Smash.Models.Vacacion
-
 @{
-    ViewData["Title"] = "Nueva Vacación";
+    ViewData["Title"] = "Nueva Solicitud de Vacaciones";
 }
-
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card rounded-3">
-                <div class="card-body">
-                    <h4 class="card-title">Registrar Vacación</h4>
+    <div class="row"><div class="col-12">
+        <div class="card rounded-3"><div class="card-body">
+            <h4 class="card-title">Nueva Solicitud</h4>
 
-                    <form asp-action="Create">
-                        <div class="mb-3">
-                            <label asp-for="EmpleadoNombre" class="form-label">Empleado</label>
-                            <select asp-for="EmpleadoNombre" class="form-select" asp-items="ViewBag.Empleados">
-                                <option value="">Seleccione un empleado</option>
-                            </select>
-                        </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        <div class="mb-3">
-                            <label asp-for="FechaInicio" class="form-label">Fecha de Inicio</label>
-                            <input asp-for="FechaInicio" class="form-control" type="date" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="FechaFin" class="form-label">Fecha de Fin</label>
-                            <input asp-for="FechaFin" class="form-control" type="date" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Estado" class="form-label">Estado</label>
-                            <select asp-for="Estado" class="form-select">
-                                <option value="">Seleccione un estado</option>
-                                <option value="Aprobada">Aprobada</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Rechazada">Rechazada</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ti ti-plus me-1"></i> Guardar
-                        </button>
-                        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
-                    </form>
+            <form asp-action="Create" novalidate>
+                <div class="mb-3">
+                    <label asp-for="EmpleadoId" class="form-label">Empleado</label>
+                    <select asp-for="EmpleadoId" class="form-select" asp-items="ViewBag.Empleados" required>
+                        <option value="">Seleccione un empleado</option>
+                    </select>
+                    <span asp-validation-for="EmpleadoId" class="text-danger"></span>
                 </div>
-            </div>
-        </div>
-    </div>
+
+                <div class="row g-2">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FechaInicio" class="form-label">Fecha Inicio</label>
+                        <input asp-for="FechaInicio" type="date" class="form-control" id="FechaInicio" required />
+                        <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FechaFin" class="form-label">Fecha Fin</label>
+                        <input asp-for="FechaFin" type="date" class="form-control" id="FechaFin" required />
+                        <span asp-validation-for="FechaFin" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Estado" class="form-label">Estado</label>
+                        <select asp-for="Estado" class="form-select" asp-items="ViewBag.Estados" required></select>
+                        <span asp-validation-for="Estado" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FechaSolicitud" class="form-label">Fecha Solicitud</label>
+                        <input asp-for="FechaSolicitud" type="date" class="form-control" />
+                        <span asp-validation-for="FechaSolicitud" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Días Calculados</label>
+                        <input id="DiasCalc" class="form-control" type="text" value="0" readonly />
+                        <div class="form-text">Se calcula automáticamente con las fechas.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DiasSolicitados" class="form-label">Días Solicitados</label>
+                        <input asp-for="DiasSolicitados" class="form-control" type="number" min="1" required />
+                        <div class="form-text">Puede ajustarlo si aplica (se recalcula al guardar si queda en 0 o negativo).</div>
+                        <span asp-validation-for="DiasSolicitados" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AprobadoPor" class="form-label">Aprobado por</label>
+                    <select asp-for="AprobadoPor" class="form-select" asp-items="ViewBag.Aprobadores">
+                        <option value="">(Sin definir)</option>
+                    </select>
+                    <span asp-validation-for="AprobadoPor" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary"><i class="ti ti-plus me-1"></i> Guardar</button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+            </form>
+        </div></div>
+    </div></div>
 </div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const fi = document.getElementById("FechaInicio");
+            const ff = document.getElementById("FechaFin");
+            const dc = document.getElementById("DiasCalc");
+            function calc() {
+                const a = new Date(fi.value), b = new Date(ff.value);
+                if (!isNaN(a) && !isNaN(b)) {
+                    const ms = b - a;
+                    const d = Math.floor(ms / (1000*60*60*24)) + 1;
+                    dc.value = d > 0 ? d : 0;
+                } else { dc.value = 0; }
+            }
+            [fi, ff].forEach(el => el && el.addEventListener('change', calc));
+            calc();
+        })();
+    </script>
+}

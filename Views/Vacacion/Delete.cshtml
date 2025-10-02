@@ -1,40 +1,42 @@
 @model SGA_Smash.Models.Vacacion
-
 @{
-    ViewData["Title"] = "Eliminar Vacación";
+    ViewData["Title"] = "Eliminar Solicitud";
 }
-
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card rounded-3 border border-danger">
-                <div class="card-body">
-                    <h4 class="card-title text-danger">¿Estás seguro de que deseas eliminar esta vacación?</h4>
-                    <div class="mb-3">
-                        <strong>Empleado:</strong> @Model.EmpleadoNombre
-                    </div>
-                    <div class="mb-3">
-                        <strong>Desde:</strong> @Model.FechaInicio.ToString("dd/MM/yyyy")
-                    </div>
-                    <div class="mb-3">
-                        <strong>Hasta:</strong> @Model.FechaFin.ToString("dd/MM/yyyy")
-                    </div>
-                    <div class="mb-3">
-                        <strong>Días:</strong> @Model.Dias
-                    </div>
-                    <div class="mb-3">
-                        <strong>Estado:</strong> @Model.Estado
-                    </div>
+<div class="row"><div class="col-12">
+<div class="card border-danger rounded-3"><div class="card-body">
+<h4 class="card-title text-danger">¿Eliminar esta solicitud?</h4>
+<p class="mb-4">Esta acción no se puede deshacer.</p>
 
-                    <form asp-action="Delete">
-                        <input type="hidden" asp-for="Id" />
-                        <button type="submit" class="btn btn-danger">
-                            <i class="ti ti-trash me-1"></i> Eliminar
-                        </button>
-                        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
-                    </form>
-                </div>
-            </div>
-        </div>
+<dl class="row">
+    <dt class="col-sm-3">Empleado</dt>
+    <dd class="col-sm-9">@((Model.Empleado?.Nombre) ?? $"Empleado #{Model.EmpleadoId}")</dd>
+
+    <dt class="col-sm-3">Periodo</dt>
+    <dd class="col-sm-9">@Model.FechaInicio.ToString("dd/MM/yyyy") - @Model.FechaFin.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Días</dt>
+    <dd class="col-sm-9">@Model.DiasSolicitados</dd>
+
+    <dt class="col-sm-3">Estado</dt>
+    <dd class="col-sm-9">@Model.Estado</dd>
+
+    <dt class="col-sm-3">Fecha Solicitud</dt>
+    <dd class="col-sm-9">@Model.FechaSolicitud.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-3">Aprobado por</dt>
+    <dd class="col-sm-9">@((Model.Aprobador?.Nombre) ?? (Model.AprobadoPor.HasValue ? $"Empleado #{Model.AprobadoPor}" : "-"))</dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-danger">
+            <i class="ti ti-trash me-1"></i> Eliminar
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
     </div>
+</form>
+</div></div>
+</div></div>
 </div>

@@ -18,6 +18,7 @@ namespace SGA_Smash.Data
         public DbSet<Categoria> Categoria { get; set; }
         public DbSet<Usuario> Usuario { get; set; }
         public DbSet<Planilla> Planillas { get; set; }
+        public DbSet<Vacacion> Vacaciones { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,7 +57,51 @@ namespace SGA_Smash.Data
                       .HasForeignKey(r => r.ClienteId)
                       .OnDelete(DeleteBehavior.Restrict);
 
+
+            });
+
+            // Configuración para Planilla
+            modelBuilder.Entity<Planilla>(entity =>
+            {
+                entity.ToTable("Planilla");
+                entity.HasKey(p => p.Id);
+
+                entity.Property(p => p.Id).HasColumnName("id");
+                entity.Property(p => p.EmpleadoId).HasColumnName("empleado_id");
+                entity.Property(p => p.Mes).HasColumnName("mes");
+                entity.Property(p => p.Anio).HasColumnName("anio");
+                entity.Property(p => p.SalarioBase).HasColumnName("salario_base").HasColumnType("decimal(10,2)");
+                entity.Property(p => p.Bonificaciones).HasColumnName("bonificaciones").HasColumnType("decimal(10,2)");
+                entity.Property(p => p.Deducciones).HasColumnName("deducciones").HasColumnType("decimal(10,2)");
+
                 
+                entity.HasOne(p => p.Empleado)
+                      .WithMany()
+                      .HasForeignKey(p => p.EmpleadoId)
+                      .HasConstraintName("FK_Planilla_Empleado");
+            });
+
+            // Configuración para Vacacion
+            modelBuilder.Entity<Vacacion>(entity =>
+            {
+                entity.ToTable("Vacacion");
+                entity.HasKey(v => v.Id);
+                entity.Property(v => v.Id).HasColumnName("id");
+                entity.Property(v => v.EmpleadoId).HasColumnName("empleado_id");
+                entity.Property(v => v.FechaInicio).HasColumnName("fecha_inicio");
+                entity.Property(v => v.FechaFin).HasColumnName("fecha_fin");
+                entity.Property(v => v.Estado).HasColumnName("estado");
+                entity.Property(v => v.DiasSolicitados).HasColumnName("dias_solicitados");
+                entity.Property(v => v.FechaSolicitud).HasColumnName("fecha_solicitud");
+                entity.Property(v => v.AprobadoPor).HasColumnName("aprobado_por");
+
+                entity.HasOne(v => v.Empleado)
+                    .WithMany()
+                    .HasForeignKey(v => v.EmpleadoId);
+
+                entity.HasOne(v => v.Aprobador)
+                    .WithMany()
+                    .HasForeignKey(v => v.AprobadoPor);
             });
 
         }
