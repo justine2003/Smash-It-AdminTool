@@ -1,75 +1,170 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SGA_Smash.Data;
 using SGA_Smash.Models;
 
-namespace SGA_Smash.Controllers;
-
-public class ReservacionController : Controller
+namespace SGA_Smash.Controllers
 {
-    private static List<string> empleados = new() { "Andrea", "Luis", "Carlos" };
-
-    private static List<Reservacion> reservaciones = new List<Reservacion>
+    public class ReservacionController : Controller
     {
-        new Reservacion { Id = 1, ClienteId = 1, ClienteNombre = "Juan Pérez", FechaHora = new DateTime(2024, 8, 25, 19, 0, 0), Mesa = "M1", Estado = "Confirmada", RegistradoPor = "Andrea" },
-        new Reservacion { Id = 2, ClienteId = 2, ClienteNombre = "Ana María", FechaHora = new DateTime(2024, 8, 26, 20, 30, 0), Mesa = "M3", Estado = "Pendiente", RegistradoPor = "Luis" },
-        new Reservacion { Id = 3, ClienteId = 3, ClienteNombre = "Luis Fernando", FechaHora = new DateTime(2024, 8, 27, 18, 45, 0), Mesa = "M2", Estado = "Cancelada", RegistradoPor = "Andrea" }
-    };
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<ReservacionController> _logger;
 
-    public IActionResult Index()
-    {
-        return View(reservaciones);
-    }
+        public ReservacionController(ApplicationDbContext context, ILogger<ReservacionController> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
 
-    public IActionResult Create()
-{
-    ViewBag.Empleados = empleados;
-    return View();
-}
+        // LISTADO
+        public async Task<IActionResult> Index()
+        {
+            var reservaciones = await _context.Reservaciones
+                .Include(r => r.Cliente)
+                .ToListAsync();
 
-[HttpPost]
-public IActionResult Create(Reservacion r)
-{
-    r.Id = reservaciones.Max(x => x.Id) + 1;
-    reservaciones.Add(r);
-    return RedirectToAction("Index");
-}
+            return View(reservaciones);
+        }
 
-    public IActionResult Edit(int id)
-{
-    var r = reservaciones.FirstOrDefault(x => x.Id == id);
-    if (r == null) return NotFound();
-    ViewBag.Empleados = empleados;
-    return View(r);
-}
+        // GET: CREATE
+        public async Task<IActionResult> Create()
+        {
+            var clientes = await _context.Clientes.ToListAsync();
+            ViewBag.Clientes = clientes;
+            _logger.LogInformation("Create GET - Clientes disponibles: {Count}", clientes.Count);
+            if (clientes.Count == 0)
+            {
+                TempData["Error"] = "No hay clientes registrados. Registra al menos uno antes de crear una reservación.";
+            }
+            return View(new Reservacion());
+        }
 
-[HttpPost]
-public IActionResult Edit(int id, Reservacion rEdit)
-{
-    var r = reservaciones.FirstOrDefault(x => x.Id == id);
-    if (r == null) return NotFound();
+        // POST: CREATE
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Reservacion reservacion)
+        {
+            _logger.LogInformation("Create POST - ClienteId recibido: {ClienteId}", reservacion.ClienteId);
+            _logger.LogInformation("Create POST - FechaHora recibida: {FechaHora}", reservacion.FechaHora);
+            _logger.LogInformation("Create POST - Mesa recibida: {Mesa}", reservacion.Mesa);
+            _logger.LogInformation("Create POST - Estado recibido: {Estado}", reservacion.Estado);
+            
+            // Validaciones adicionales
+            if (reservacion.ClienteId <= 0)
+            {
+                ModelState.AddModelError(nameof(reservacion.ClienteId), "Debe seleccionar un cliente");
+                _logger.LogWarning("ClienteId inválido: {ClienteId}", reservacion.ClienteId);
+            }
 
-    r.ClienteNombre = rEdit.ClienteNombre;
-    r.FechaHora = rEdit.FechaHora;
-    r.Mesa = rEdit.Mesa;
-    r.Estado = rEdit.Estado;
-    r.RegistradoPor = rEdit.RegistradoPor;
+            // Si no se envía fecha, quedaría como DateTime.MinValue, inválido en SQL Server
+            if (reservacion.FechaHora == default)
+            {
+                ModelState.AddModelError(nameof(reservacion.FechaHora), "Debe ingresar fecha y hora válidas");
+            }
 
-    return RedirectToAction("Index");
-}
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Manejo de FK registrado_por: si no existe Usuario 1, permitir null
+                    reservacion.RegistradoPor = 1;
+                    _context.Reservaciones.Add(reservacion);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Reservación creada correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateException)
+                {
+                    _logger.LogWarning("Fallo al guardar con RegistradoPor=1. Reintentando con null.");
+                    // Reintentar sin registrado_por si hay error de FK
+                    _context.ChangeTracker.Clear();
+                    reservacion.RegistradoPor = null;
+                    _context.Reservaciones.Add(reservacion);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Reservación creada (sin usuario registrado).";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
 
-    public IActionResult Delete(int id)
-    {
-        var reservacion = reservaciones.FirstOrDefault(r => r.Id == id);
-        if (reservacion == null) return NotFound();
-        return View(reservacion);
-    }
+            // Si falla la validación, volvemos a cargar la lista de clientes
+            ViewBag.Clientes = await _context.Clientes.ToListAsync();
+            var allErrors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            if (!string.IsNullOrWhiteSpace(allErrors))
+            {
+                TempData["Error"] = allErrors;
+            }
+            return View(reservacion);
+        }
 
-    [HttpPost, ActionName("Delete")]
-    public IActionResult DeleteConfirmed(int id)
-    {
-        var reservacion = reservaciones.FirstOrDefault(r => r.Id == id);
-        if (reservacion == null) return NotFound();
+        // GET: EDIT
+        public async Task<IActionResult> Edit(int id)
+        {
+            var reservacion = await _context.Reservaciones.FindAsync(id);
+            if (reservacion == null) return NotFound();
 
-        reservaciones.Remove(reservacion);
-        return RedirectToAction("Index");
+            ViewBag.Clientes = await _context.Clientes.ToListAsync();
+            return View(reservacion);
+        }
+
+        // POST: EDIT
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Reservacion reservacion)
+        {
+            if (id != reservacion.Id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(reservacion);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Reservación actualizada correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error al actualizar reservación");
+                    TempData["Error"] = "Error al actualizar la reservación. Intente nuevamente.";
+                }
+            }
+
+            ViewBag.Clientes = await _context.Clientes.ToListAsync();
+            return View(reservacion);
+        }
+
+        // GET: DELETE
+        public async Task<IActionResult> Delete(int id)
+        {
+            var reservacion = await _context.Reservaciones
+                .Include(r => r.Cliente)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (reservacion == null) return NotFound();
+            return View(reservacion);
+        }
+
+        // POST: DELETE
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                var reservacion = await _context.Reservaciones.FindAsync(id);
+                if (reservacion == null) return NotFound();
+
+                _context.Reservaciones.Remove(reservacion);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Reservación eliminada correctamente.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al eliminar reservación");
+                TempData["Error"] = "Error al eliminar la reservación. Intente nuevamente.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

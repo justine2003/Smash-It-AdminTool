@@ -9,8 +9,4 @@ public class Producto
     public decimal PrecioEntregaDias { get; set; }
     public int StockActual { get; set; }
     public int MinimoStock { get; set; }
-    public int CategoriaId { get; set; }
-
-    
-    public Categoria? Categoria { get; set; }
 }

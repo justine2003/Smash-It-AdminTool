@@ -1,71 +1,121 @@
 using Microsoft.AspNetCore.Mvc;
 using SGA_Smash.Models;
+using SGA_Smash.Repositories;
 
 namespace SGA_Smash.Controllers
 {
     public class ProveedorController : Controller
     {
-        private static List<Proveedor> proveedores = new List<Proveedor>
-        {
-            new Proveedor { Id = 1, Nombre = "Distribuidora Central", Contacto = "Mario López", Telefono = "8888-1111", Correo = "mario@central.com" },
-            new Proveedor { Id = 2, Nombre = "Alimentos del Valle", Contacto = "Laura Rodríguez", Telefono = "8888-2222", Correo = "laura@valle.com" },
-            new Proveedor { Id = 3, Nombre = "Proveeduría La Huerta", Contacto = "Carlos Méndez", Telefono = "8888-3333", Correo = "carlos@huerta.com" }
-        };
+        private readonly IProveedorRepository _proveedorRepository;
+        private readonly ILogger<ProveedorController> _logger;
 
-        public IActionResult Index()
+        public ProveedorController(IProveedorRepository proveedorRepository, ILogger<ProveedorController> logger)
         {
+            _proveedorRepository = proveedorRepository;
+            _logger = logger;
+        }
+
+        // LISTADO
+        public async Task<IActionResult> Index()
+        {
+            var proveedores = await _proveedorRepository.GetAllProveedores();
             return View(proveedores);
         }
 
+        // GET: CREATE
         public IActionResult Create()
         {
             return View();
         }
 
+        // POST: CREATE
         [HttpPost]
-        public IActionResult Create(Proveedor proveedor)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Proveedor proveedor)
         {
-            proveedor.Id = proveedores.Max(p => p.Id) + 1;
-            proveedores.Add(proveedor);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _proveedorRepository.AddProveedor(proveedor);
+                    TempData["Success"] = "Proveedor creado correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error al crear proveedor");
+                    TempData["Error"] = "Error al crear el proveedor. Intente nuevamente.";
+                }
+            }
+
+            // Si falla la validación, mostrar errores
+            var allErrors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            if (!string.IsNullOrWhiteSpace(allErrors))
+            {
+                TempData["Error"] = allErrors;
+            }
+
+            return View(proveedor);
         }
 
-        public IActionResult Edit(int id)
+        // GET: EDIT
+        public async Task<IActionResult> Edit(int id)
         {
-            var proveedor = proveedores.FirstOrDefault(p => p.Id == id);
+            var proveedor = await _proveedorRepository.GetProveedorById(id);
             if (proveedor == null) return NotFound();
             return View(proveedor);
         }
 
+        // POST: EDIT
         [HttpPost]
-        public IActionResult Edit(int id, Proveedor proveedorActualizado)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Proveedor proveedor)
         {
-            var proveedor = proveedores.FirstOrDefault(p => p.Id == id);
-            if (proveedor == null) return NotFound();
+            if (id != proveedor.Id) return NotFound();
 
-            proveedor.Nombre = proveedorActualizado.Nombre;
-            proveedor.Contacto = proveedorActualizado.Contacto;
-            proveedor.Telefono = proveedorActualizado.Telefono;
-            proveedor.Correo = proveedorActualizado.Correo;
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _proveedorRepository.UpdateProveedor(proveedor);
+                    TempData["Success"] = "Proveedor actualizado correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error al actualizar proveedor");
+                    TempData["Error"] = "Error al actualizar el proveedor. Intente nuevamente.";
+                }
+            }
 
-            return RedirectToAction("Index");
+            return View(proveedor);
         }
 
-        public IActionResult Delete(int id)
-{
-    var proveedor = proveedores.FirstOrDefault(p => p.Id == id);
-    if (proveedor == null) return NotFound();
-    return View(proveedor);
-}
+        // GET: DELETE
+        public async Task<IActionResult> Delete(int id)
+        {
+            var proveedor = await _proveedorRepository.GetProveedorById(id);
+            if (proveedor == null) return NotFound();
+            return View(proveedor);
+        }
 
-[HttpPost, ActionName("Delete")]
-public IActionResult DeleteConfirmed(int id)
-{
-    var proveedor = proveedores.FirstOrDefault(p => p.Id == id);
-    if (proveedor == null) return NotFound();
+        // POST: DELETE
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                await _proveedorRepository.DeleteProveedor(id);
+                TempData["Success"] = "Proveedor eliminado correctamente.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al eliminar proveedor");
+                TempData["Error"] = "Error al eliminar el proveedor. Puede estar siendo utilizado en otras partes del sistema.";
+            }
 
-    proveedores.Remove(proveedor);
-    return RedirectToAction("Index");
-}
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
