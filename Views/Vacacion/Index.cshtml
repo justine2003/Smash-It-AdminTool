@@ -1,76 +1,81 @@
 @model IEnumerable<SGA_Smash.Models.Vacacion>
-
 @{
     ViewData["Title"] = "Vacaciones";
 }
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card rounded-3">
-                <div class="card-body">
-                    <div class="d-md-flex align-items-center justify-content-between">
-                        <div>
-                            <h4 class="card-title">Vacaciones Registradas</h4>
-                            <p class="card-subtitle">Lista de vacaciones otorgadas al personal</p>
-                        </div>
-                        <div>
-                            <a asp-action="Create" class="btn btn-primary">
-                                <i class="ti ti-plus me-1"></i> Nueva Vacación
-                            </a>
-                        </div>
-                    </div>
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Vacaciones</h3>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Nueva Solicitud
+            </a>
+        </div>
+    </div>
 
-                    <div class="table-responsive mt-4">
-                        <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
-                            <thead>
-                                <tr>
-                                    <th class="px-0 text-muted">Empleado</th>
-                                    <th class="px-0 text-muted">Desde</th>
-                                    <th class="px-0 text-muted">Hasta</th>
-                                    <th class="px-0 text-muted">Días</th>
-                                    <th class="px-0 text-muted">Estado</th>
-                                    <th class="px-0 text-muted text-end">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var vacacion in Model)
-                                {
-                                    <tr>
-                                        <td class="px-0">@vacacion.EmpleadoNombre</td>
-                                        <td class="px-0">@vacacion.FechaInicio.ToString("dd/MM/yyyy")</td>
-                                        <td class="px-0">@vacacion.FechaFin.ToString("dd/MM/yyyy")</td>
-                                        <td class="px-0">@vacacion.Dias</td>
-                                        <td class="px-0">
-                                            @if (vacacion.Estado == "Aprobada")
-                                            {
-                                                <span class="badge bg-success">Aprobada</span>
-                                            }
-                                            else if (vacacion.Estado == "Pendiente")
-                                            {
-                                                <span class="badge bg-warning">Pendiente</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">Rechazada</span>
-                                            }
-                                        </td>
-                                        <td class="px-0 text-end">
-                                            <a asp-action="Edit" asp-route-id="@vacacion.Id" class="btn btn-sm btn-warning me-1">
-                                                <i class="ti ti-pencil"></i>
-                                            </a>
-                                            <a asp-action="Delete" asp-route-id="@vacacion.Id" class="btn btn-sm btn-danger">
-                                                <i class="ti ti-trash"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+    @{
+        var success = TempData["Success"] as string;
+    }
+    @if (!string.IsNullOrWhiteSpace(success))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @success
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
+    @if (Model == null || !Model.Any())
+    {
+        <div class="card rounded-3">
+            <div class="card-body text-center py-5">
+                <h5 class="mb-2">No hay solicitudes registradas</h5>
+                <a asp-action="Create" class="btn btn-outline-primary">
+                    <i class="ti ti-plus me-1"></i> Crear solicitud
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card rounded-3">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Periodo</th>
+                                <th class="text-center">Días</th>
+                                <th>Estado</th>
+                                <th>Fecha Solicitud</th>
+                                <th>Aprobado por</th>
+                                <th class="text-center" style="width: 170px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-secondary">
+                        @foreach (var v in Model)
+                        {
+                            <tr>
+                                <td>@(v.Empleado?.Nombre ?? $"Empleado #{v.EmpleadoId}")</td>
+                                <td>@v.FechaInicio.ToString("dd/MM/yyyy") - @v.FechaFin.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center fw-semibold">@v.DiasSolicitados</td>
+                                <td>@v.Estado</td>
+                                <td>@v.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                                <td>@(v.Aprobador?.Nombre ?? (v.AprobadoPor.HasValue ? $"Empleado #{v.AprobadoPor}" : "-"))</td>
+                                <td class="text-center text-nowrap">
+                                    <a asp-action="Edit" asp-route-id="@v.Id" class="btn btn-warning btn-sm px-2 py-1 me-2 d-inline-flex align-items-center rounded-3">
+                                        <i class="ti ti-pencil"></i><span class="ms-1">Editar</span>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@v.Id" class="btn btn-danger btn-sm px-2 py-1 d-inline-flex align-items-center rounded-3">
+                                        <i class="ti ti-trash"></i><span class="ms-1">Eliminar</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
+    }
 </div>
