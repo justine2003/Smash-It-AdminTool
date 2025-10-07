@@ -1,4 +1,5 @@
 
+using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Models;
 
@@ -18,8 +19,6 @@ namespace SGA_Smash.Repositories
         {
             return await _context.Planillas
                 .AsNoTracking()
-                .ThenByDescending(p => p.Mes)
-                .ThenBy(p => p.EmpleadoId)
                 .ToListAsync();
         }
 
