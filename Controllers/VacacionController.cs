@@ -1,77 +1,115 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Models;
+using SGA_Smash.Repositories;
 
-namespace SGA_Smash.Controllers;
-
-public class VacacionController : Controller
+namespace SGA_Smash.Controllers
 {
-    private static List<Empleado> empleados = new List<Empleado>
+    public class VacacionController : Controller
     {
-        new Empleado { Id = 1, Nombre = "Carlos Soto", Puesto = "Cocinero", SalarioBase = 450000, FechaIngreso = new DateTime(2022, 3, 15), Estado = "Activo" },
-        new Empleado { Id = 2, Nombre = "Andrea Gómez", Puesto = "Mesera", SalarioBase = 350000, FechaIngreso = new DateTime(2023, 1, 10), Estado = "Activo" },
-        new Empleado { Id = 3, Nombre = "Luis Mora", Puesto = "Cajero", SalarioBase = 400000, FechaIngreso = new DateTime(2021, 9, 5), Estado = "Inactivo" }
-    };
+        private readonly IVacacionRepository _vacacionRepository;
+        private readonly IEmpleadoRepository _empleadoRepository;
 
-    private static List<Vacacion> vacaciones = new List<Vacacion>
-    {
-        new Vacacion { Id = 1, EmpleadoNombre = "Carlos Soto", FechaInicio = new DateTime(2024, 7, 1), FechaFin = new DateTime(2024, 7, 15), Estado = "Aprobado" },
-        new Vacacion { Id = 2, EmpleadoNombre = "Andrea Gómez", FechaInicio = new DateTime(2024, 8, 5), FechaFin = new DateTime(2024, 8, 10), Estado = "Pendiente" }
-    };
+        public VacacionController(IVacacionRepository vacacionRepository, IEmpleadoRepository empleadoRepository)
+        {
+            _vacacionRepository = vacacionRepository;
+            _empleadoRepository = empleadoRepository;
+        }
 
-    public IActionResult Index()
-    {
-        return View(vacaciones);
-    }
+        private async Task LoadCombosAsync(int? empleadoId = null, int? aprobadorId = null, string estado = null)
+        {
+            var empleados = await _empleadoRepository.GetAllEmpleadosAsync();
+            ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre", empleadoId);
+            ViewBag.Aprobadores = new SelectList(empleados, "Id", "Nombre", aprobadorId);
 
-    public IActionResult Create()
-    {
-        ViewBag.Empleados = new SelectList(empleados.Select(e => e.Nombre));
-        return View();
-    }
+            var estados = new[] { "Pendiente", "Aprobada", "Rechazada" };
+            ViewBag.Estados = new SelectList(estados, estado);
+        }
 
-    [HttpPost]
-    public IActionResult Create(Vacacion vacacion)
-    {
-        vacacion.Id = vacaciones.Max(v => v.Id) + 1;
-        vacaciones.Add(vacacion);
-        return RedirectToAction("Index");
-    }
+        public async Task<IActionResult> Index()
+        {
+            var items = await _vacacionRepository.GetAllAsync();
+            return View(items);
+        }
 
-    public IActionResult Edit(int id)
-    {
-        var vacacion = vacaciones.FirstOrDefault(v => v.Id == id);
-        if (vacacion == null) return NotFound();
-        ViewBag.Empleados = new SelectList(empleados.Select(e => e.Nombre));
-        return View(vacacion);
-    }
+        public async Task<IActionResult> Details(int id)
+        {
+            var item = await _vacacionRepository.GetByIdAsync(id);
+            if (item == null) return NotFound();
+            return View(item);
+        }
 
-    [HttpPost]
-    public IActionResult Edit(int id, Vacacion actualizado)
-    {
-        var vacacion = vacaciones.FirstOrDefault(v => v.Id == id);
-        if (vacacion == null) return NotFound();
+        public async Task<IActionResult> Create()
+        {
+            await LoadCombosAsync();
+            return View();
+        }
 
-        vacacion.EmpleadoNombre = actualizado.EmpleadoNombre;
-        vacacion.FechaInicio = actualizado.FechaInicio;
-        vacacion.FechaFin = actualizado.FechaFin;
-        vacacion.Estado = actualizado.Estado;
-        return RedirectToAction("Index");
-    }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Vacacion vacacion)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadCombosAsync(vacacion.EmpleadoId, vacacion.AprobadoPor, vacacion.Estado);
+                return View(vacacion);
+            }
 
-    public IActionResult Delete(int id)
-    {
-        var vacacion = vacaciones.FirstOrDefault(v => v.Id == id);
-        if (vacacion == null) return NotFound();
-        return View(vacacion);
-    }
+            await _vacacionRepository.AddAsync(vacacion);
+            TempData["Success"] = "Solicitud de vacaciones registrada con éxito.";
+            return RedirectToAction(nameof(Index));
+        }
 
-    [HttpPost, ActionName("Delete")]
-    public IActionResult DeleteConfirmed(int id)
-    {
-        var vacacion = vacaciones.FirstOrDefault(v => v.Id == id);
-        if (vacacion == null) return NotFound();
-        vacaciones.Remove(vacacion);
-        return RedirectToAction("Index");
+        public async Task<IActionResult> Edit(int id)
+        {
+            var item = await _vacacionRepository.GetByIdAsync(id);
+            if (item == null) return NotFound();
+
+            await LoadCombosAsync(item.EmpleadoId, item.AprobadoPor, item.Estado);
+            return View(item);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Vacacion vacacion)
+        {
+            if (id != vacacion.Id) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                await LoadCombosAsync(vacacion.EmpleadoId, vacacion.AprobadoPor, vacacion.Estado);
+                return View(vacacion);
+            }
+
+            try
+            {
+                await _vacacionRepository.UpdateAsync(vacacion);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await _vacacionRepository.ExistsAsync(vacacion.Id)) return NotFound();
+                else throw;
+            }
+
+            TempData["Success"] = "Solicitud de vacaciones actualizada con éxito.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var item = await _vacacionRepository.GetByIdAsync(id);
+            if (item == null) return NotFound();
+            return View(item);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _vacacionRepository.DeleteAsync(id);
+            TempData["Success"] = "Solicitud de vacaciones eliminada con éxito.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

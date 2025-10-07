@@ -1,5 +1,4 @@
 @model SGA_Smash.Models.Planilla
-
 @{
     ViewData["Title"] = "Nueva Planilla";
 }
@@ -10,27 +9,53 @@
             <div class="card rounded-3">
                 <div class="card-body">
                     <h4 class="card-title">Registrar Planilla</h4>
-                    <form asp-action="Create">
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <form asp-action="Create" novalidate>
                         <div class="mb-3">
-                            <label asp-for="EmpleadoNombre" class="form-label">Empleado</label>
-                            <select asp-for="EmpleadoNombre" class="form-select" asp-items="ViewBag.Empleados">
+                            <label asp-for="EmpleadoId" class="form-label">Empleado</label>
+                            <select asp-for="EmpleadoId" class="form-select" asp-items="ViewBag.Empleados" required>
                                 <option value="">Seleccione un empleado</option>
                             </select>
+                            <span asp-validation-for="EmpleadoId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Mes" class="form-label">Mes</label>
+                                <input asp-for="Mes" class="form-control" type="number" min="1" max="12" required />
+                                <span asp-validation-for="Mes" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Anio" class="form-label">Año</label>
+                                <input asp-for="Anio" class="form-control" type="number" min="2000" max="2100" required />
+                                <span asp-validation-for="Anio" class="text-danger"></span>
+                            </div>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="SalarioBase" class="form-label"></label>
-                            <input asp-for="SalarioBase" class="form-control" />
+                            <label asp-for="SalarioBase" class="form-label">Salario Base</label>
+                            <input asp-for="SalarioBase" class="form-control" type="number" step="0.01" min="0" required id="SalarioBase" />
+                            <span asp-validation-for="SalarioBase" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Deducciones" class="form-label"></label>
-                            <input asp-for="Deducciones" class="form-control" />
+                            <label asp-for="Deducciones" class="form-label">Deducciones</label>
+                            <input asp-for="Deducciones" class="form-control" type="number" step="0.01" min="0" required id="Deducciones" />
+                            <span asp-validation-for="Deducciones" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Bonificaciones" class="form-label"></label>
-                            <input asp-for="Bonificaciones" class="form-control" />
+                            <label asp-for="Bonificaciones" class="form-label">Bonificaciones</label>
+                            <input asp-for="Bonificaciones" class="form-control" type="number" step="0.01" min="0" required id="Bonificaciones" />
+                            <span asp-validation-for="Bonificaciones" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Total a Pagar</label>
+                            <input id="TotalPago" class="form-control" type="text" value="0.00" readonly />
+                            <span class="form-text">Se calcula: Base - Deducciones + Bonificaciones</span>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -43,3 +68,33 @@
         </div>
     </div>
 </div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const baseInput = document.getElementById("SalarioBase");
+            const dedInput  = document.getElementById("Deducciones");
+            const bonInput  = document.getElementById("Bonificaciones");
+            const totInput  = document.getElementById("TotalPago");
+            const form = document.querySelector("form");
+
+            function toNumber(v){ const n = parseFloat(v); return isNaN(n)?0:n; }
+            function calcular() {
+                const total = toNumber(baseInput.value) - toNumber(dedInput.value) + toNumber(bonInput.value);
+                totInput.value = total.toFixed(2);
+            }
+            [baseInput, dedInput, bonInput].forEach(el => el?.addEventListener("input", calcular));
+            calcular();
+
+            form.addEventListener("submit", (e) => {
+                calcular();
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.classList.add("was-validated");
+                }
+            });
+        })();
+    </script>
+}

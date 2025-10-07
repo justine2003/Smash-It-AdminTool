@@ -17,6 +17,14 @@
                         </div>
                     </div>
 
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Success"]</div>
+                    }
                     <div class="table-responsive mt-4">
                         <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
                             <thead>
@@ -33,7 +41,7 @@
                                 @foreach (var r in Model)
                                 {
                                     <tr>
-                                        <td class="px-0">@r.ClienteNombre</td>
+                                        <td class="px-0">@r.Cliente?.Nombre</td>
                                         <td class="px-0">@r.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                         <td class="px-0">@r.Mesa</td>
                                         <td class="px-0">
@@ -41,7 +49,6 @@
                                                 @r.Estado
                                             </span>
                                         </td>
-                                        <td class="px-0">@r.RegistradoPor</td>
                                         <td class="px-0 text-end">
                                             <a asp-action="Edit" asp-route-id="@r.Id" class="btn btn-sm btn-warning me-1">
                                                 <i class="ti ti-pencil"></i>

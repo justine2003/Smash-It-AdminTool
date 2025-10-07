@@ -16,7 +16,7 @@ namespace SGA_Smash.Controllers
             new Bitacora { Id = 7, Usuario = "soporte", Modulo = "Planilla", Accion = "Pagar", Fecha = new DateTime(2024, 8, 7), Detalles = "Pagado salario de mes julio a Andrea Gómez" },
             new Bitacora { Id = 8, Usuario = "admin", Modulo = "Vacaciones", Accion = "Aprobar", Fecha = new DateTime(2024, 8, 8), Detalles = "Vacaciones aprobadas para Luis Mora" },
             new Bitacora { Id = 9, Usuario = "soporte", Modulo = "Inventario", Accion = "Eliminar", Fecha = new DateTime(2024, 8, 9), Detalles = "Se eliminó registro duplicado de Aceite vegetal" },
-            new Bitacora { Id = 10, Usuario = "jose", Modulo = "Proveedores", Accion = "Actualizar", Fecha = new DateTime(2024, 8, 10), Detalles = "Correo electrónico actualizado de Distribuidora Central" }
+            new Bitacora { Id = 10, Usuario = "jose", Modulo = "Proveedor", Accion = "Actualizar", Fecha = new DateTime(2024, 8, 10), Detalles = "Correo electrónico actualizado de Distribuidora Central" }
         };
 
         public IActionResult Index()

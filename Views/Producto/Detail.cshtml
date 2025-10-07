@@ -1,0 +1,105 @@
+@model SGA_Smash.Models.Producto
+
+@{
+    ViewData["Title"] = "Detalles del Producto";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1">
+            <div class="card rounded-3 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title">@ViewData["Title"]</h4>
+                    <hr />
+
+                    <dl class="row">
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Nombre)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Nombre)
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.UnidadMedida)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.UnidadMedida)
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.PrecioUnitario)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Model.PrecioUnitario.ToString("C")
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.StockActual)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.StockActual)
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.MinimoStock)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.MinimoStock)
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Fecha_movimiento)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Fecha_movimiento)
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            Proveedor
+                        </dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Proveedor != null)
+                            {
+                                @Html.DisplayFor(model => model.Proveedor.Nombre)
+                            }
+                            else
+                            {
+                                <span class="text-muted">No asignado</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Categoria)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Categoria != null)
+                            {
+                                @Html.DisplayFor(model => model.Categoria.Nombre)
+                            }
+                            else
+                            {
+                                <span class="text-muted">No asignada</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.Estado)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Estado)
+                        </dd>
+
+                    </dl>
+
+                    <div class="mt-4">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+                        <a asp-action="Index" class="btn btn-primary ms-2">Regresar</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -43,6 +43,35 @@
                             <input asp-for="MinimoStock" class="form-control" />
                         </div>
 
+                        <div>
+                            <label asp-for="Fecha_movimiento" class="form-label"></label>
+                            <input asp-for="Fecha_movimiento" class="form-control" />
+                        </div>
+
+                        <div>
+                            <label asp-for="Proveedor" class="form-label"></label>
+                            <select asp-for="ProveedorId" class="form-select" asp-items="ViewBag.ProveedorId">
+                                <option value="">-- Seleccione un proveedor --</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Categoria" class="form-label"></label>
+                            <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.CategoriaId">
+                                <option value="">-- Seleccione una categoría --</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Estado" class="form-label"></label>
+                            <select asp-for="Estado" class="form-select">
+                                <option value="">-- Seleccione una categoría --</option>
+                                <option value="Disponible">Disponible</option>
+                                <option value="Uso">En Uso</option>
+                                <option value="Agotado">Agotado</option>
+                            </select>
+                        </div>
+
                         <button type="submit" class="btn btn-warning">
                             <i class="ti ti-pencil me-1"></i> Guardar Cambios
                         </button>
