@@ -1,11 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 
-=======
 using SGA_Smash.Data;
 using SGA_Smash.Models;
 
 
->>>>>>> main
 namespace SGA_Smash.Repositories
 {
     public class PlanillaRepository : IPlanillaRepository
@@ -21,7 +18,6 @@ namespace SGA_Smash.Repositories
         {
             return await _context.Planillas
                 .AsNoTracking()
-                .OrderByDescending(p => p.Anio)
                 .ThenByDescending(p => p.Mes)
                 .ThenBy(p => p.EmpleadoId)
                 .ToListAsync();
@@ -29,7 +25,6 @@ namespace SGA_Smash.Repositories
 
         public async Task<Planilla?> GetByIdAsync(int id)
         {
-<<<<<<< HEAD
             return await _context.Planillas
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
