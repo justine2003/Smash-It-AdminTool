@@ -41,11 +41,30 @@ public IActionResult Create(Reservacion r)
     return View(r);
 }
 
+<<<<<<< Updated upstream
 [HttpPost]
 public IActionResult Edit(int id, Reservacion rEdit)
 {
     var r = reservaciones.FirstOrDefault(x => x.Id == id);
     if (r == null) return NotFound();
+=======
+        // POST: CREATE
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Reservacion reservacion)
+        {
+            _logger.LogInformation("Create POST - ClienteId recibido: {ClienteId}", reservacion.ClienteId);
+            _logger.LogInformation("Create POST - FechaHora recibida: {FechaHora}", reservacion.FechaHora);
+            _logger.LogInformation("Create POST - Mesa recibida: {Mesa}", reservacion.Mesa);
+            _logger.LogInformation("Create POST - Estado recibido: {Estado}", reservacion.Estado);
+
+            // Validaciones adicionales
+            if (reservacion.ClienteId <= 0)
+            {
+                ModelState.AddModelError(nameof(reservacion.ClienteId), "Debe seleccionar un cliente");
+                _logger.LogWarning("ClienteId inválido: {ClienteId}", reservacion.ClienteId);
+            }
+>>>>>>> Stashed changes
 
     r.ClienteNombre = rEdit.ClienteNombre;
     r.FechaHora = rEdit.FechaHora;

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SGA_Smash.Models;
-using System.Linq;
 
 namespace SGA_Smash.Controllers;
 

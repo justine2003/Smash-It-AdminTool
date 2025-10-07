@@ -29,6 +29,32 @@ namespace SGA_Smash.Data
                 entity.ToTable("Cliente");
                 entity.Property(e => e.FechaRegistro).HasColumnName("FechaRegistro");
             });
+<<<<<<< Updated upstream
+=======
+
+            // Configuración para Reservacion
+            modelBuilder.Entity<Reservacion>(entity =>
+            {
+                entity.ToTable("Reservacion");
+
+                entity.HasKey(r => r.Id);
+
+                entity.Property(r => r.Id).HasColumnName("id");
+                entity.Property(r => r.ClienteId).HasColumnName("cliente_id");
+                entity.Property(r => r.FechaHora).HasColumnName("fecha_hora");
+                entity.Property(r => r.Mesa).HasColumnName("mesa");
+                entity.Property(r => r.Estado).HasColumnName("estado");
+                entity.Property(r => r.RegistradoPor).HasColumnName("registrado_por");
+
+                entity.HasOne(r => r.Cliente)
+                      .WithMany()
+                      .HasForeignKey(r => r.ClienteId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+
+            });
+
+>>>>>>> Stashed changes
         }
     }
 }

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using SGA_Smash.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SGA_Smash.Models;
 
 namespace SGA_Smash.Controllers;
 
