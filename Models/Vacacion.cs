@@ -1,17 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGA_Smash.Models
-{
-<<<<<<< HEAD
-    public int Id { get; set; }
-    public string EmpleadoNombre { get; set; }
-    public DateTime FechaInicio { get; set; }
-    public DateTime FechaFin { get; set; }
-    public int Dias => (FechaFin - FechaInicio).Days + 1;
-    public string Estado { get; set; }
-}
-=======
+namespace SGA_Smash.Models;
+
     [Table("Vacacion")]
     public class Vacacion : IValidatableObject
     {
@@ -60,5 +51,5 @@ namespace SGA_Smash.Models
                 yield return new ValidationResult("Debe indicar quién aprobó la solicitud.", new[] { nameof(AprobadoPor) });
         }
     }
-}
->>>>>>> main
+
+

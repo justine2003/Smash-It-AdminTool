@@ -23,6 +23,7 @@ namespace SGA_Smash.Models
         public DateTime FechaHora { get; set; }
 
         [Column("mesa")]
+        [Required(ErrorMessage = "Debe ingresar la mesa")]
         public string Mesa { get; set; }
 
         [Column("estado")]

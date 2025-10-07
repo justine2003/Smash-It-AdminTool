@@ -38,11 +38,7 @@ namespace SGA_Smash.Data
                 entity.ToTable("Cliente");
                 entity.Property(e => e.FechaRegistro).HasColumnName("FechaRegistro");
             });
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> main
+
 
             // Configuración para Reservacion
             modelBuilder.Entity<Reservacion>(entity =>
@@ -66,9 +62,7 @@ namespace SGA_Smash.Data
 
             });
 
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
+
             // Configuración para Planilla
             modelBuilder.Entity<Planilla>(entity =>
             {
@@ -113,7 +107,7 @@ namespace SGA_Smash.Data
                     .HasForeignKey(v => v.AprobadoPor);
             });
 
->>>>>>> main
+
         }
 
     }

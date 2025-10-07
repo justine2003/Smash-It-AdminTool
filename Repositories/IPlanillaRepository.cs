@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-=======
-using System.Collections.Generic;
-using System.Threading.Tasks;
->>>>>>> main
 using SGA_Smash.Models;
 
 namespace SGA_Smash.Repositories
