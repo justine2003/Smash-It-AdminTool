@@ -56,18 +56,6 @@ CREATE TABLE Usuario (
     FOREIGN KEY (rol_id) REFERENCES Roles(id)
 );
 
--- Tabla Bitacora
-CREATE TABLE Bitacora (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    usuario_id INT,
-    accion VARCHAR(255),
-    tabla_afectada VARCHAR(100),
-    id_registro_afectado INT,
-    descripcion TEXT,
-    fecha_hora DATETIME,
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
-);
-
 -- Tabla Cliente
 CREATE TABLE Cliente (
     id INT PRIMARY KEY IDENTITY(1,1),
