@@ -18,7 +18,7 @@ public class ProductoController : Controller
 
     public IActionResult Index()
     {
-        var productos = _context.Producto.Include(p => p.Categoria).ToList(); 
+        var productos = _context.Producto.Include(p => p.Categoria).ToList();
 
         return View(productos);
     }
@@ -81,7 +81,7 @@ public class ProductoController : Controller
         return View(actualizado);
     }
 
-    public IActionResult Detail(int id) 
+    public IActionResult Detail(int id)
     {
         var producto = _context.Producto
             .Include(p => p.Categoria)
@@ -108,5 +108,52 @@ public class ProductoController : Controller
 
         _context.Producto.Remove(producto);
         return RedirectToAction("Index");
+    }
+
+    public bool Stock(int productoId, int cantidad, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        var producto = _context.Producto.FirstOrDefault(p => p.Id == productoId);
+
+        if (producto == null)
+        {
+            errorMessage = "Producto no encontrado.";
+            return false;
+        }
+
+        if (producto.StockActual < cantidad)
+        {
+            errorMessage = "Stock insuficiente.";
+            return false;
+        }
+
+        producto.StockActual -= cantidad;
+        producto.Fecha_movimiento = DateTime.Now;
+
+        if (producto.StockActual <= producto.MinimoStock)
+        {
+            string alerta = $"Alerta: El stock del producto '{producto.Nombre}' ha alcanzado el nivel mínimo.";
+
+            var Notificacion = new Notificacion
+            {
+                Mensaje = alerta,
+                Fecha = DateTime.Now,
+                Tipo = "Alerta"
+            };
+            _context.Add(Notificacion);
+        }
+
+        try
+        {
+            _context.Update(producto);
+            _context.SaveChanges();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al actualizar el stock: {ex.Message}";
+            return false;
+        }
     }
 }

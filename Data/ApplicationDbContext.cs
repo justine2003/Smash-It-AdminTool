@@ -14,6 +14,7 @@ namespace SGA_Smash.Data
         public DbSet<Reservacion> Reservaciones { get; set; }
         public DbSet<Proveedor> Proveedor { get; set; }
         public DbSet<Producto> Producto { get; set; }
+        public DbSet<Notificacion> Notificacion { get; set; }
         public DbSet<Inventario> Inventario { get; set; }
         public DbSet<Categoria> Categoria { get; set; }
         public DbSet<Usuario> Usuario { get; set; }
