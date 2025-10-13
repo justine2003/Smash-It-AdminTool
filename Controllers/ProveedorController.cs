@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SGA_Smash.Models;
 using SGA_Smash.Repositories;
+using System.Linq;
+
 
 namespace SGA_Smash.Controllers
 {
@@ -16,9 +18,37 @@ namespace SGA_Smash.Controllers
         }
 
         // LISTADO
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? filtro, int pagina = 1)
         {
+            const int registrosPorPagina = 20;
             var proveedores = await _proveedorRepository.GetAllProveedores();
+
+            // Filtrar por nombre o contacto
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                filtro = filtro.ToLower();
+                proveedores = proveedores
+                    .Where(p => (p.Nombre != null && p.Nombre.ToLower().Contains(filtro)) ||
+                                (p.Contacto != null && p.Contacto.ToLower().Contains(filtro)))
+                    .ToList();
+            }
+
+            // Ordenar alfabéticamente por nombre
+            proveedores = proveedores.OrderBy(p => p.Nombre).ToList();
+
+            // Paginación
+            var totalRegistros = proveedores.Count();
+            var totalPaginas = (int)Math.Ceiling(totalRegistros / (double)registrosPorPagina);
+            proveedores = proveedores
+                .Skip((pagina - 1) * registrosPorPagina)
+                .Take(registrosPorPagina)
+                .ToList();
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.Filtro = filtro;
+
+
             return View(proveedores);
         }
 

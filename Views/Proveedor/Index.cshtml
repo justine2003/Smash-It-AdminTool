@@ -14,10 +14,10 @@
                         <div class="alert alert-success">@TempData["Success"]</div>
                     }
 
-                    <div class="d-md-flex align-items-center justify-content-between">
+                    <div class="d-md-flex align-items-center justify-content-between mb-3">
                         <div>
                             <h4 class="card-title">Proveedores Registrados</h4>
-                            <p class="card-subtitle">Lista de proveedores del sistema (@Model.Count() registros)</p>
+                            <p class="card-subtitle">Lista de proveedores del sistema</p>
                         </div>
                         <div>
                             <a asp-action="Create" class="btn btn-primary">
@@ -26,9 +26,22 @@
                         </div>
                     </div>
 
+                    <!-- Buscador -->
+                    <form method="get" asp-action="Index" class="mb-3">
+                        <div class="input-group">
+                            <input type="text" name="filtro" value="@ViewBag.Filtro" class="form-control" placeholder="Buscar por nombre o contacto..." />
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="ti ti-search"></i> Buscar
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="ti ti-x"></i> Limpiar
+                            </a>
+                        </div>
+                    </form>
+
                     @if (Model.Any())
                     {
-                        <div class="table-responsive mt-4">
+                        <div class="table-responsive mt-3">
                             <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
                                 <thead>
                                     <tr>
@@ -36,6 +49,7 @@
                                         <th class="px-0 text-muted">Contacto</th>
                                         <th class="px-0 text-muted">Teléfono</th>
                                         <th class="px-0 text-muted">Correo</th>
+                                        <th class="px-0 text-muted">Estado</th>
                                         <th class="px-0 text-muted text-end">Acciones</th>
                                     </tr>
                                 </thead>
@@ -43,12 +57,20 @@
                                     @foreach (var proveedor in Model)
                                     {
                                         <tr>
-                                            <td class="px-0">
-                                                <strong>@proveedor.Nombre</strong>
-                                            </td>
+                                            <td class="px-0"><strong>@proveedor.Nombre</strong></td>
                                             <td class="px-0">@(proveedor.Contacto ?? "-")</td>
                                             <td class="px-0">@(proveedor.Telefono ?? "-")</td>
                                             <td class="px-0">@(proveedor.Correo ?? "-")</td>
+                                            <td class="px-0">
+                                                @if (proveedor.Estado)
+                                                {
+                                                    <span class="badge bg-success">Activo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactivo</span>
+                                                }
+                                            </td>
                                             <td class="px-0 text-end">
                                                 <a asp-action="Edit" asp-route-id="@proveedor.Id" class="btn btn-sm btn-warning me-1" title="Editar">
                                                     <i class="ti ti-pencil"></i>
@@ -62,6 +84,21 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Paginación -->
+                        @if (ViewBag.TotalPaginas > 1)
+                        {
+                            <nav aria-label="Paginación de proveedores" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                                    {
+                                        <li class="page-item @(ViewBag.PaginaActual == i ? "active" : "")">
+                                            <a class="page-link" asp-action="Index" asp-route-pagina="@i" asp-route-filtro="@ViewBag.Filtro">@i</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
                     }
                     else
                     {

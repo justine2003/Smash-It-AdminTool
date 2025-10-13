@@ -144,3 +144,6 @@ CREATE TABLE Producto_Proveedor (
     FOREIGN KEY (producto_id) REFERENCES Producto(id),
     FOREIGN KEY (proveedor_id) REFERENCES Proveedor(id)
 );
+--Agegar estado a tabla proovedor
+ALTER TABLE Proveedor
+ADD estado BIT NOT NULL DEFAULT 1;
