@@ -22,6 +22,12 @@ namespace SGA_Smash.Models
         [Column("fecha_hora")]
         public DateTime FechaHora { get; set; }
 
+        [Column("numero_personas")]
+        [Required(ErrorMessage = "Debe ingresar el número de personas")]
+        [Range(1, 20, ErrorMessage = "El número de personas debe ser entre 1 y 20")]
+        public int NumeroPersonas { get; set; }
+
+
         [Column("mesa")]
         [Required(ErrorMessage = "Debe ingresar la mesa")]
         public string Mesa { get; set; }

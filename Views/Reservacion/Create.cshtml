@@ -55,6 +55,14 @@
                             <span asp-validation-for="Mesa" class="text-danger"></span>
                         </div>
 
+                        <!-- Número de Personas -->    
+                        <div class="mb-3">
+                            <label asp-for="NumeroPersonas" class="form-label">Número de Personas</label>
+                            <input asp-for="NumeroPersonas" type="number" min="1" max="20" class="form-control" />
+                            <span asp-validation-for="NumeroPersonas" class="text-danger"></span>
+                        </div>
+
+
                         <!-- Estado -->
                         <div class="mb-3">
                             <label asp-for="Estado" class="form-label">Estado</label>

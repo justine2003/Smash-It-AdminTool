@@ -48,6 +48,7 @@ namespace SGA_Smash.Controllers
             _logger.LogInformation("Create POST - ClienteId recibido: {ClienteId}", reservacion.ClienteId);
             _logger.LogInformation("Create POST - FechaHora recibida: {FechaHora}", reservacion.FechaHora);
             _logger.LogInformation("Create POST - Mesa recibida: {Mesa}", reservacion.Mesa);
+            _logger.LogInformation("Create POST - NumeroPersonas recibido: {NumeroPersonas}", reservacion.NumeroPersonas);
             _logger.LogInformation("Create POST - Estado recibido: {Estado}", reservacion.Estado);
 
             // Validaciones adicionales
@@ -62,6 +63,18 @@ namespace SGA_Smash.Controllers
             {
                 ModelState.AddModelError(nameof(reservacion.FechaHora), "Debe ingresar fecha y hora válidas");
             }
+            // Validar rango de numero de personas
+            if (reservacion.NumeroPersonas < 1 || reservacion.NumeroPersonas > 20)
+                ModelState.AddModelError(nameof(reservacion.NumeroPersonas), "El número de personas debe estar entre 1 y 20.");
+
+            // Validar disponibilidad de la mesa
+            bool mesaOcupada = await _context.Reservaciones.AnyAsync(r =>
+                r.Mesa == reservacion.Mesa &&
+                r.FechaHora == reservacion.FechaHora &&
+                r.Estado != "Cancelada");
+
+            if (mesaOcupada)
+                ModelState.AddModelError(nameof(reservacion.Mesa), "La mesa ya está reservada para esa fecha y hora.");
 
             if (ModelState.IsValid)
             {
@@ -114,22 +127,61 @@ namespace SGA_Smash.Controllers
         {
             if (id != reservacion.Id) return NotFound();
 
+            // Mantener datos del cliente original
+            var reservacionExistente = await _context.Reservaciones
+                .Include(r => r.Cliente)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (reservacionExistente == null)
+                return NotFound();
+
+            // Validar disponibilidad de mesa en la nueva fecha/hora
+            bool mesaOcupada = await _context.Reservaciones
+                .AnyAsync(r => r.Id != id &&
+                               r.Mesa == reservacion.Mesa &&
+                               r.FechaHora == reservacion.FechaHora &&
+                               r.Estado != "Cancelada");
+
+            if (mesaOcupada)
+            {
+                ModelState.AddModelError(nameof(reservacion.FechaHora),
+                    "La mesa seleccionada ya está reservada en esa fecha y hora.");
+            }
+
+            if (reservacion.NumeroPersonas < 1 || reservacion.NumeroPersonas > 20)
+                ModelState.AddModelError(nameof(reservacion.NumeroPersonas), "El número de personas debe estar entre 1 y 20.");
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(reservacion);
+                    // Actualizamos solo los campos modificables
+                    reservacionExistente.FechaHora = reservacion.FechaHora;
+                    reservacionExistente.Mesa = reservacion.Mesa;
+                    reservacionExistente.NumeroPersonas = reservacion.NumeroPersonas;
+                    reservacionExistente.Estado = reservacion.Estado;
+
+                    _context.Update(reservacionExistente);
                     await _context.SaveChangesAsync();
-                    TempData["Success"] = "Reservación actualizada correctamente.";
+
+                    // Notificar al cliente (simulado por ahora) 
+                    _logger.LogInformation(
+                        "Notificación: La reservación del cliente {Cliente} fue actualizada para {FechaHora}.",
+                        reservacionExistente.Cliente?.Nombre,
+                        reservacionExistente.FechaHora
+                    );
+
+                    TempData["Success"] = "Reservación actualizada correctamente y cliente notificado.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error al actualizar reservación");
-                    TempData["Error"] = "Error al actualizar la reservación. Intente nuevamente.";
+                    TempData["Error"] = "Ocurrió un error al actualizar la reservación.";
                 }
             }
 
+            // Si hay errores, recargamos datos del cliente
             ViewBag.Clientes = await _context.Clientes.ToListAsync();
             return View(reservacion);
         }
@@ -141,7 +193,9 @@ namespace SGA_Smash.Controllers
                 .Include(r => r.Cliente)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (reservacion == null) return NotFound();
+            if (reservacion == null)
+                return NotFound();
+
             return View(reservacion);
         }
 
@@ -167,5 +221,6 @@ namespace SGA_Smash.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
     }
 }

@@ -8,6 +8,7 @@ CREATE TABLE Roles (
     descripcion VARCHAR(255)
 );
 
+
 -- Tabla Empleado
 CREATE TABLE Empleado (
     id INT PRIMARY KEY IDENTITY(1,1),
@@ -147,3 +148,7 @@ CREATE TABLE Producto_Proveedor (
 --Agegar estado a tabla proovedor
 ALTER TABLE Proveedor
 ADD estado BIT NOT NULL DEFAULT 1;
+
+--Agregar numero de personas a tabla reservacion
+ALTER TABLE Reservacion
+ADD numero_personas INT NOT NULL DEFAULT 1;

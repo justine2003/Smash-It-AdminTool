@@ -32,6 +32,7 @@
                                     <th class="px-0 text-muted">Cliente</th>
                                     <th class="px-0 text-muted">Fecha y Hora</th>
                                     <th class="px-0 text-muted">Mesa</th>
+                                    <th class="px-0 text-muted">N° Personas</th>
                                     <th class="px-0 text-muted">Estado</th>
                                     <th class="px-0 text-muted">Registrado por</th>
                                     <th class="px-0 text-muted text-end">Acciones</th>
@@ -44,6 +45,7 @@
                                         <td class="px-0">@r.Cliente?.Nombre</td>
                                         <td class="px-0">@r.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                         <td class="px-0">@r.Mesa</td>
+                                        <td class="px-0">@r.NumeroPersonas</td>
                                         <td class="px-0">
                                             <span class="badge bg-@(r.Estado == "Confirmada" ? "success" : r.Estado == "Pendiente" ? "warning" : "danger")">
                                                 @r.Estado
