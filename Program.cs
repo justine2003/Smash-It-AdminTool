@@ -15,6 +15,8 @@ builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IPlanillaRepository, PlanillaRepository>();
 builder.Services.AddScoped<IVacacionRepository, VacacionRepository>();
+builder.Services.AddScoped<IPlanillaReportService, PlanillaReportService>();
+builder.Services.AddScoped<IHistorialPagosService, HistorialPagosService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

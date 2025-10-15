@@ -1,0 +1,93 @@
+@model SGA_Smash.Models.Reporting.PayrollReportResult
+@using System.Globalization
+@{
+    ViewData["Title"] = "Reporte de Planilla Mensual";
+    var esCR = new CultureInfo("es-CR");
+    string MonthName(int m) => new DateTime(2000, m, 1).ToString("MMMM", esCR);
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Reporte de Planilla Mensual</h3>
+            <div class="text-muted small">Generado en @ViewBag.ElapsedMs ms</div>
+        </div>
+    </div>
+
+    <div class="card rounded-3 mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Mes</label>
+                    <select name="mes" class="form-select">
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            <option value="@m" selected="@(m == Model.Mes)">@MonthName(m)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Año</label>
+                    <input name="anio" type="number" class="form-control" value="@Model.Anio" min="2000" max="2100" />
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary"><i class="ti ti-refresh me-1"></i> Generar</button>
+                    <a class="btn btn-outline-success ms-2" asp-action="ExportExcel" asp-route-mes="@Model.Mes" asp-route-anio="@Model.Anio">
+                        <i class="ti ti-file-spreadsheet me-1"></i> Excel
+                    </a>
+                    <a class="btn btn-outline-danger ms-2" asp-action="ExportPdf" asp-route-mes="@Model.Mes" asp-route-anio="@Model.Anio">
+                        <i class="ti ti-file-type-pdf me-1"></i> PDF
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card rounded-3">
+        <div class="card-body">
+            @if (Model.Rows == null || !Model.Rows.Any())
+            {
+                <div class="text-center text-muted py-5">
+                    No hay registros de planilla para el periodo seleccionado.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Empleado</th>
+                                <th class="text-end">Salario Bruto</th>
+                                <th class="text-end">Deducciones</th>
+                                <th class="text-end">Bonificaciones</th>
+                                <th class="text-end">Salario Neto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model.Rows)
+                            {
+                                <tr>
+                                    <td>@r.EmpleadoNombre</td>
+                                    <td class="text-end">@($"₡{r.SalarioBruto.ToString("N0", esCR)}")</td>
+                                    <td class="text-end">@($"₡{r.Deducciones.ToString("N0", esCR)}")</td>
+                                    <td class="text-end">@($"₡{r.Bonificaciones.ToString("N0", esCR)}")</td>
+                                    <td class="text-end fw-semibold">@($"₡{r.SalarioNeto.ToString("N0", esCR)}")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th>Totales</th>
+                                <th class="text-end">@($"₡{Model.TotalBruto.ToString("N0", esCR)}")</th>
+                                <th class="text-end">@($"₡{Model.TotalDeducciones.ToString("N0", esCR)}")</th>
+                                <th class="text-end">@($"₡{Model.TotalBonificaciones.ToString("N0", esCR)}")</th>
+                                <th class="text-end">@($"₡{Model.TotalNeto.ToString("N0", esCR)}")</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
