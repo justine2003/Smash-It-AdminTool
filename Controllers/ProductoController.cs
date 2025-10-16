@@ -57,27 +57,53 @@ public class ProductoController : Controller
     [HttpPost]
     public IActionResult Edit(int id, Producto actualizado)
     {
-        var producto = _context.Producto.FirstOrDefault(p => p.Id == id);
-        if (producto == null) return NotFound();
+        var productoOriginal = _context.Producto.AsNoTracking().FirstOrDefault(p => p.Id == id);
+        if (productoOriginal == null) return NotFound();
 
         if (ModelState.IsValid)
         {
-            producto.Nombre = actualizado.Nombre;
-            producto.ProveedorId = actualizado.ProveedorId;
-            producto.UnidadMedida = actualizado.UnidadMedida;
-            producto.PrecioUnitario = actualizado.PrecioUnitario;
-            producto.PrecioEntregaDias = actualizado.PrecioEntregaDias;
-            producto.StockActual = actualizado.StockActual;
-            producto.MinimoStock = actualizado.MinimoStock;
-            producto.CategoriaId = actualizado.CategoriaId;
-            producto.Fecha_movimiento = actualizado.Fecha_movimiento;
-            producto.Estado = actualizado.Estado;
+            int stockAnterior = productoOriginal.StockActual;
+            int nuevoStock = actualizado.StockActual;
+            bool stockDescontadoEnMetodoStock = false;
+
+            if (nuevoStock < stockAnterior)
+            {
+                string errorMessage;
+
+                if (!Stock(id, nuevoStock, out errorMessage))
+                {
+                    ModelState.AddModelError(string.Empty, errorMessage);
+                    ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", actualizado.CategoriaId);
+                    ViewBag.ProveedorID = new SelectList(_context.Proveedor, "Id", "Nombre", actualizado.ProveedorId);
+                    return View(actualizado);
+                }
+                stockDescontadoEnMetodoStock = true;
+            }
+
+            var productoAActualizar = _context.Producto.FirstOrDefault(p => p.Id == id);
+            if (productoAActualizar == null) return NotFound();
+
+            productoAActualizar.Nombre = actualizado.Nombre;
+            productoAActualizar.ProveedorId = actualizado.ProveedorId;
+            productoAActualizar.UnidadMedida = actualizado.UnidadMedida;
+            productoAActualizar.PrecioUnitario = actualizado.PrecioUnitario;
+            productoAActualizar.PrecioEntregaDias = actualizado.PrecioEntregaDias;
+            productoAActualizar.MinimoStock = actualizado.MinimoStock;
+            productoAActualizar.CategoriaId = actualizado.CategoriaId;
+            productoAActualizar.Estado = actualizado.Estado;
+
+            if (nuevoStock >= stockAnterior)
+            {
+                productoAActualizar.StockActual = nuevoStock;
+                productoAActualizar.Fecha_movimiento = DateTime.Now;
+            }
 
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
 
         ViewBag.CategoriaID = new SelectList(_context.Categoria, "Id", "Nombre", actualizado.CategoriaId);
+        ViewBag.ProveedorID = new SelectList(_context.Proveedor, "Id", "Nombre", actualizado.ProveedorId);
         return View(actualizado);
     }
 
