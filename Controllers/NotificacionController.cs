@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SGA_Smash.Data;
 using SGA_Smash.Models;
 using System;
 using System.Collections.Generic;
@@ -7,14 +10,16 @@ namespace SGA_Smash.Controllers
 {
     public class NotificacionController : Controller
     {
+        private readonly ApplicationDbContext _context;
+
+        public NotificacionController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            var notificaciones = new List<Notificacion>
-            {
-                new Notificacion { Id = 1, Mensaje = "Producto 'Pan Brioche' agotado.", Fecha = DateTime.Now.AddHours(-1), Tipo = "Alerta" },
-                new Notificacion { Id = 2, Mensaje = "Inventario de 'Carne Smash' bajo.", Fecha = DateTime.Now.AddHours(-3), Tipo = "Alerta" },
-                new Notificacion { Id = 3, Mensaje = "Se actualizó el inventario correctamente.", Fecha = DateTime.Now.AddDays(-1), Tipo = "Info" }
-            };
+           var notificaciones = _context.Notificacion.OrderByDescending(p => p.Fecha).ToList();
 
             return View(notificaciones);
         }
