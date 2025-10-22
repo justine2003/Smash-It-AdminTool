@@ -120,6 +120,13 @@ CREATE TABLE Producto (
    FOREIGN KEY (ProveedorId) REFERENCES Proveedor(Id)
 );
 
+CREATE TABLE Notificacion (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Mensaje NVARCHAR(MAX) NOT NULL,
+    Fecha DATETIME NOT NULL DEFAULT GETDATE(),
+    Tipo NVARCHAR(50) NOT NULL
+);
+
 -- Tabla Producto_Proveedor
 CREATE TABLE Producto_Proveedor (
     id INT PRIMARY KEY IDENTITY(1,1),
