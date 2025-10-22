@@ -132,3 +132,6 @@ CREATE TABLE Producto_Proveedor (
     FOREIGN KEY (producto_id) REFERENCES Producto(id),
     FOREIGN KEY (proveedor_id) REFERENCES Proveedor(id)
 );
+
+
+ALTER TABLE Empleado ADD dias_vacaciones_disponibles INT NOT NULL DEFAULT 0;

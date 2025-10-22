@@ -30,5 +30,9 @@ namespace SGA_Smash.Models
         [Required(ErrorMessage = "El estado es obligatorio")]
         [StringLength(50, ErrorMessage = "El estado no puede exceder 50 caracteres")]
         public string Estado { get; set; }
+
+        [Column("dias_vacaciones_disponibles")]
+        [Range(0, int.MaxValue, ErrorMessage = "Los días disponibles deben ser >= 0")]
+        public int DiasVacacionesDisponibles { get; set; }
     }
 }
