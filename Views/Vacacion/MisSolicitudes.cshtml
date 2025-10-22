@@ -1,0 +1,50 @@
+@model IEnumerable<SGA_Smash.Models.Vacacion>
+@{
+    ViewData["Title"] = "Mis Solicitudes de Vacaciones";
+    var empleadoId = (int)ViewBag.EmpleadoId;
+}
+<div class="container-fluid">
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Mis Solicitudes</h3>
+      <a asp-action="Solicitar" asp-route-empleadoId="@empleadoId" class="btn btn-primary">
+        <i class="ti ti-plus me-1"></i> Nueva Solicitud
+      </a>
+    </div>
+  </div>
+
+  @if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+
+  <div class="card rounded-3"><div class="card-body">
+    @if (Model == null || !Model.Any())
+    {
+      <div class="text-center text-muted py-5">No hay solicitudes registradas.</div>
+    }
+    else
+    {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Periodo</th>
+              <th>Días</th>
+              <th>Estado</th>
+              <th>Fecha Solicitud</th>
+            </tr>
+          </thead>
+          <tbody>
+          @foreach (var v in Model)
+          {
+            <tr>
+              <td>@v.FechaInicio.ToString("dd/MM/yyyy") - @v.FechaFin.ToString("dd/MM/yyyy")</td>
+              <td>@v.DiasSolicitados</td>
+              <td>@v.Estado</td>
+              <td>@v.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div></div>
+</div>

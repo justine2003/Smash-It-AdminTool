@@ -1,94 +1,67 @@
 @model SGA_Smash.Models.Vacacion
 @{
-    ViewData["Title"] = "Editar Solicitud";
+    ViewData["Title"] = "Editar Solicitud de Vacaciones";
 }
+
 <div class="container-fluid">
-<div class="row"><div class="col-12">
-<div class="card rounded-3"><div class="card-body">
-<h4 class="card-title">Editar Solicitud</h4>
+  <div class="row"><div class="col-12">
+    <div class="card rounded-3"><div class="card-body">
+      <h4 class="card-title">Editar Solicitud</h4>
 
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+      <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<form asp-action="Edit" novalidate>
-    <input type="hidden" asp-for="Id" />
-    <div class="mb-3">
-        <label asp-for="EmpleadoId" class="form-label">Empleado</label>
-        <select asp-for="EmpleadoId" class="form-select" asp-items="ViewBag.Empleados" required>
-            <option value="">Seleccione un empleado</option>
-        </select>
-        <span asp-validation-for="EmpleadoId" class="text-danger"></span>
-    </div>
+      <form asp-action="Edit" method="post" novalidate>
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Estado" /> @* se mantiene Pendiente *@
+        <input type="hidden" asp-for="FechaSolicitud" />
+        <input type="hidden" asp-for="AprobadoPor" />
 
-    <div class="row g-2">
-        <div class="col-md-6 mb-3">
+        <div class="mb-3">
+          <label asp-for="EmpleadoId" class="form-label">Empleado Id</label>
+          <input asp-for="EmpleadoId" type="number" min="1" class="form-control" readonly />
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-6 mb-3">
             <label asp-for="FechaInicio" class="form-label">Fecha Inicio</label>
             <input asp-for="FechaInicio" type="date" class="form-control" id="FechaInicio" required />
             <span asp-validation-for="FechaInicio" class="text-danger"></span>
-        </div>
-        <div class="col-md-6 mb-3">
+          </div>
+          <div class="col-md-6 mb-3">
             <label asp-for="FechaFin" class="form-label">Fecha Fin</label>
             <input asp-for="FechaFin" type="date" class="form-control" id="FechaFin" required />
             <span asp-validation-for="FechaFin" class="text-danger"></span>
+          </div>
         </div>
-    </div>
 
-    <div class="row g-2">
-        <div class="col-md-6 mb-3">
-            <label asp-for="Estado" class="form-label">Estado</label>
-            <select asp-for="Estado" class="form-select" asp-items="ViewBag.Estados" required></select>
-            <span asp-validation-for="Estado" class="text-danger"></span>
+        <div class="mb-3">
+          <label class="form-label">Días Solicitados (estimado)</label>
+          <input id="DiasCalc" class="form-control" type="text" value="0" readonly />
         </div>
-        <div class="col-md-6 mb-3">
-            <label asp-for="FechaSolicitud" class="form-label">Fecha Solicitud</label>
-            <input asp-for="FechaSolicitud" type="date" class="form-control" />
-            <span asp-validation-for="FechaSolicitud" class="text-danger"></span>
-        </div>
-    </div>
 
-    <div class="row g-2">
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Días Calculados</label>
-            <input id="DiasCalc" class="form-control" type="text" value="@Model.DiasCalculados" readonly />
-        </div>
-        <div class="col-md-6 mb-3">
-            <label asp-for="DiasSolicitados" class="form-label">Días Solicitados</label>
-            <input asp-for="DiasSolicitados" class="form-control" type="number" min="1" required />
-            <span asp-validation-for="DiasSolicitados" class="text-danger"></span>
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="AprobadoPor" class="form-label">Aprobado por</label>
-        <select asp-for="AprobadoPor" class="form-select" asp-items="ViewBag.Aprobadores">
-            <option value="">(Sin definir)</option>
-        </select>
-        <span asp-validation-for="AprobadoPor" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary"><i class="ti ti-check me-1"></i> Guardar cambios</button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
-</form>
-</div></div>
-</div></div>
+        <button class="btn btn-primary"><i class="ti ti-check me-1"></i> Guardar</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+      </form>
+    </div></div>
+  </div></div>
 </div>
 
 @section Scripts{
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        (function () {
-            const fi = document.getElementById("FechaInicio");
-            const ff = document.getElementById("FechaFin");
-            const dc = document.getElementById("DiasCalc");
-            function calc() {
-                const a = new Date(fi.value), b = new Date(ff.value);
-                if (!isNaN(a) && !isNaN(b)) {
-                    const ms = b - a;
-                    const d = Math.floor(ms / (1000*60*60*24)) + 1;
-                    dc.value = d > 0 ? d : 0;
-                } else { dc.value = 0; }
-            }
-            [fi, ff].forEach(el => el && el.addEventListener('change', calc));
-            calc();
-        })();
-    </script>
+  <partial name="_ValidationScriptsPartial" />
+  <script>
+    (function () {
+      const fi = document.getElementById("FechaInicio");
+      const ff = document.getElementById("FechaFin");
+      const dc = document.getElementById("DiasCalc");
+      function calc() {
+        const a = new Date(fi.value), b = new Date(ff.value);
+        if (!isNaN(a) && !isNaN(b)) {
+          const d = Math.floor((b - a) / (1000*60*60*24)) + 1;
+          dc.value = d > 0 ? d : 0;
+        } else dc.value = 0;
+      }
+      [fi, ff].forEach(el => el && el.addEventListener('change', calc));
+      calc();
+    })();
+  </script>
 }
