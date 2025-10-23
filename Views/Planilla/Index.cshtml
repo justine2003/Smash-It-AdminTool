@@ -72,6 +72,12 @@
                                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2 py-1 d-inline-flex align-items-center rounded-3">
                                         <i class="ti ti-trash"></i><span class="ms-1">Eliminar</span>
                                     </a>
+                                    <a asp-controller="ConceptoNomina"
+                                    asp-action="Index"
+                                    asp-route-empleadoId="@item.Empleado"
+                                    class="btn btn-outline-info btn-sm">
+                                    <i class="ti ti-adjustments"></i> Conceptos Activos
+                                    </a>
                                 </td>
                             </tr>
                         }

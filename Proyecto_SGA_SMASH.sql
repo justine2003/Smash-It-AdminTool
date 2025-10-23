@@ -57,18 +57,6 @@ CREATE TABLE Usuario (
     FOREIGN KEY (rol_id) REFERENCES Roles(id)
 );
 
--- Tabla Bitacora
-CREATE TABLE Bitacora (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    usuario_id INT,
-    accion VARCHAR(255),
-    tabla_afectada VARCHAR(100),
-    id_registro_afectado INT,
-    descripcion TEXT,
-    fecha_hora DATETIME,
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
-);
-
 -- Tabla Cliente
 CREATE TABLE Cliente (
     id INT PRIMARY KEY IDENTITY(1,1),
@@ -133,6 +121,13 @@ CREATE TABLE Producto (
    FOREIGN KEY (ProveedorId) REFERENCES Proveedor(Id)
 );
 
+CREATE TABLE Notificacion (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Mensaje NVARCHAR(MAX) NOT NULL,
+    Fecha DATETIME NOT NULL DEFAULT GETDATE(),
+    Tipo NVARCHAR(50) NOT NULL
+);
+
 -- Tabla Producto_Proveedor
 CREATE TABLE Producto_Proveedor (
     id INT PRIMARY KEY IDENTITY(1,1),
@@ -145,6 +140,7 @@ CREATE TABLE Producto_Proveedor (
     FOREIGN KEY (producto_id) REFERENCES Producto(id),
     FOREIGN KEY (proveedor_id) REFERENCES Proveedor(id)
 );
+
 --Agegar estado a tabla proovedor
 ALTER TABLE Proveedor
 ADD estado BIT NOT NULL DEFAULT 1;
@@ -152,3 +148,8 @@ ADD estado BIT NOT NULL DEFAULT 1;
 --Agregar numero de personas a tabla reservacion
 ALTER TABLE Reservacion
 ADD numero_personas INT NOT NULL DEFAULT 1;
+
+
+
+ALTER TABLE Empleado ADD dias_vacaciones_disponibles INT NOT NULL DEFAULT 0;
+

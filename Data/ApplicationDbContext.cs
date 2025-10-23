@@ -14,6 +14,7 @@ namespace SGA_Smash.Data
         public DbSet<Reservacion> Reservaciones { get; set; }
         public DbSet<Proveedor> Proveedor { get; set; }
         public DbSet<Producto> Producto { get; set; }
+        public DbSet<Notificacion> Notificacion { get; set; }
         public DbSet<Inventario> Inventario { get; set; }
         public DbSet<Categoria> Categoria { get; set; }
         public DbSet<Usuario> Usuario { get; set; }
@@ -84,7 +85,6 @@ namespace SGA_Smash.Data
                       .HasConstraintName("FK_Planilla_Empleado");
             });
 
-            // Configuración para Vacacion
             modelBuilder.Entity<Vacacion>(entity =>
             {
                 entity.ToTable("Vacacion");
@@ -100,11 +100,9 @@ namespace SGA_Smash.Data
 
                 entity.HasOne(v => v.Empleado)
                     .WithMany()
-                    .HasForeignKey(v => v.EmpleadoId);
-
-                entity.HasOne(v => v.Aprobador)
-                    .WithMany()
-                    .HasForeignKey(v => v.AprobadoPor);
+                    .HasForeignKey(v => v.EmpleadoId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                // NO navegación para AprobadoPor
             });
 
 

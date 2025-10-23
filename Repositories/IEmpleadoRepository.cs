@@ -10,5 +10,7 @@ namespace SGA_Smash.Repositories
         Task UpdateEmpleadoAsync(Empleado empleado);
         Task DeleteEmpleadoAsync(int id);
         Task<bool> EmpleadoExistsAsync(int id);
+        Task<int> GetDiasDisponiblesAsync(int empleadoId);
+        Task SetDiasDisponiblesAsync(int empleadoId, int nuevosDias);
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Repositories;
+using SGA_Smash.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,15 @@ builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IPlanillaRepository, PlanillaRepository>();
 builder.Services.AddScoped<IVacacionRepository, VacacionRepository>();
-
+builder.Services.AddScoped<IPlanillaReportService, PlanillaReportService>();
+builder.Services.AddScoped<IHistorialPagosService, HistorialPagosService>();
+builder.Services.AddScoped<IConceptoNominaRepository, ConceptoNominaRepository>();
+builder.Services.AddScoped<IPlanillaCalculoService, PlanillaCalculoService>();
+builder.Services.AddScoped<IVacacionRepository, VacacionRepository>();
+// Services
+builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
+builder.Services.AddScoped<INotificationService, EmailNotificationService>();
+builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

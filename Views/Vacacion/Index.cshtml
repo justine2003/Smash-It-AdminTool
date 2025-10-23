@@ -1,81 +1,108 @@
 @model IEnumerable<SGA_Smash.Models.Vacacion>
+@using System.Linq
 @{
     ViewData["Title"] = "Vacaciones";
 }
-
 <div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Vacaciones</h3>
-            <a asp-action="Create" class="btn btn-primary">
-                <i class="ti ti-plus me-1"></i> Nueva Solicitud
-            </a>
-        </div>
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Vacaciones</h3>
+      <a asp-action="Create" class="btn btn-primary">
+        <i class="ti ti-plus me-1"></i> Nueva Solicitud
+      </a>
     </div>
+  </div>
 
-    @{
-        var success = TempData["Success"] as string;
-    }
-    @if (!string.IsNullOrWhiteSpace(success))
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @success
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
+  @{
+      var success = TempData["Success"] as string;
+      var error = TempData["Error"] as string;
+  }
+  @if (!string.IsNullOrWhiteSpace(success))
+  {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+          @success
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+  }
+  @if (!string.IsNullOrWhiteSpace(error))
+  {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          @error
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+  }
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="card rounded-3">
-            <div class="card-body text-center py-5">
-                <h5 class="mb-2">No hay solicitudes registradas</h5>
-                <a asp-action="Create" class="btn btn-outline-primary">
-                    <i class="ti ti-plus me-1"></i> Crear solicitud
-                </a>
-            </div>
+  @if (Model == null || !Model.Any())
+  {
+      <div class="card rounded-3">
+        <div class="card-body text-center py-5">
+          <h5 class="mb-2">No hay solicitudes registradas</h5>
+          <a asp-action="Create" class="btn btn-outline-primary">
+            <i class="ti ti-plus me-1"></i> Crear solicitud
+          </a>
         </div>
-    }
-    else
-    {
-        <div class="card rounded-3">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Empleado</th>
-                                <th>Periodo</th>
-                                <th class="text-center">Días</th>
-                                <th>Estado</th>
-                                <th>Fecha Solicitud</th>
-                                <th>Aprobado por</th>
-                                <th class="text-center" style="width: 170px;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-secondary">
-                        @foreach (var v in Model)
-                        {
-                            <tr>
-                                <td>@(v.Empleado?.Nombre ?? $"Empleado #{v.EmpleadoId}")</td>
-                                <td>@v.FechaInicio.ToString("dd/MM/yyyy") - @v.FechaFin.ToString("dd/MM/yyyy")</td>
-                                <td class="text-center fw-semibold">@v.DiasSolicitados</td>
-                                <td>@v.Estado</td>
-                                <td>@v.FechaSolicitud.ToString("dd/MM/yyyy")</td>
-                                <td>@(v.Aprobador?.Nombre ?? (v.AprobadoPor.HasValue ? $"Empleado #{v.AprobadoPor}" : "-"))</td>
-                                <td class="text-center text-nowrap">
-                                    <a asp-action="Edit" asp-route-id="@v.Id" class="btn btn-warning btn-sm px-2 py-1 me-2 d-inline-flex align-items-center rounded-3">
-                                        <i class="ti ti-pencil"></i><span class="ms-1">Editar</span>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@v.Id" class="btn btn-danger btn-sm px-2 py-1 d-inline-flex align-items-center rounded-3">
-                                        <i class="ti ti-trash"></i><span class="ms-1">Eliminar</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      </div>
+  }
+  else
+  {
+      <div class="card rounded-3">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Empleado</th>
+                  <th>Periodo</th>
+                  <th class="text-center">Días</th>
+                  <th>Estado</th>
+                  <th>Fecha Solicitud</th>
+                  <th>Aprobado por</th>
+                  <th class="text-center" style="width: 260px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="text-secondary">
+              @foreach (var v in Model)
+              {
+                <tr>
+                  <td>@(v.Empleado?.Nombre ?? $"Empleado #{v.EmpleadoId}")</td>
+                  <td>@v.FechaInicio:dd/MM/yyyy - @v.FechaFin:dd/MM/yyyy</td>
+                  <td class="text-center fw-semibold">@v.DiasSolicitados</td>
+                  <td>@v.Estado</td>
+                  <td>@v.FechaSolicitud:dd/MM/yyyy</td>
+                  <td>@(v.AprobadoPor.HasValue ? $"Empleado #{v.AprobadoPor.Value}" : "-")</td>
+                  <td class="text-center text-nowrap">
+                    <a asp-action="Details" asp-route-id="@v.Id" class="btn btn-info btn-sm me-1">
+                      <i class="ti ti-eye"></i> Detalles
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@v.Id" class="btn btn-warning btn-sm me-1 @(v.Estado=="Pendiente" ? "" : "disabled")">
+                      <i class="ti ti-pencil"></i> Editar
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@v.Id" class="btn btn-danger btn-sm me-2">
+                      <i class="ti ti-trash"></i> Eliminar
+                    </a>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                      <form asp-action="Aprobar" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@v.Id" />
+                        <button class="btn btn-success btn-sm me-1 @(v.Estado=="Pendiente" ? "" : "disabled")">
+                          <i class="ti ti-check"></i> Aprobar
+                        </button>
+                      </form>
+                      <form asp-action="Rechazar" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@v.Id" />
+                        <button class="btn btn-outline-danger btn-sm @(v.Estado=="Pendiente" ? "" : "disabled")">
+                          <i class="ti ti-x"></i> Rechazar
+                        </button>
+                      </form>
+                    }
+                  </td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          </div>
         </div>
-    }
+      </div>
+  }
 </div>
