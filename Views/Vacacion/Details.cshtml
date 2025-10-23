@@ -1,0 +1,39 @@
+@model SGA_Smash.Models.Vacacion
+@{
+    ViewData["Title"] = "Detalle de Vacación";
+}
+<div class="container-fluid">
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Detalle de Solicitud</h3>
+      <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm me-2 @(Model.Estado=="Pendiente" ? "" : "disabled")">
+          <i class="ti ti-pencil"></i> Editar
+        </a>
+        <a asp-action="Index" class="btn btn-secondary btn-sm">Volver</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card rounded-3"><div class="card-body">
+    <dl class="row">
+      <dt class="col-sm-3">Empleado</dt>
+      <dd class="col-sm-9">@((Model.Empleado?.Nombre) ?? $"Empleado #{Model.EmpleadoId}")</dd>
+
+      <dt class="col-sm-3">Periodo</dt>
+      <dd class="col-sm-9">@Model.FechaInicio:dd/MM/yyyy - @Model.FechaFin:dd/MM/yyyy</dd>
+
+      <dt class="col-sm-3">Días</dt>
+      <dd class="col-sm-9">@Model.DiasSolicitados</dd>
+
+      <dt class="col-sm-3">Estado</dt>
+      <dd class="col-sm-9">@Model.Estado</dd>
+
+      <dt class="col-sm-3">Fecha Solicitud</dt>
+      <dd class="col-sm-9">@Model.FechaSolicitud:dd/MM/yyyy</dd>
+
+      <dt class="col-sm-3">Aprobado por</dt>
+      <dd class="col-sm-9">@((Model.AprobadoPor.HasValue) ? $"Empleado #{Model.AprobadoPor.Value}" : "-")</dd>
+    </dl>
+  </div></div>
+</div>

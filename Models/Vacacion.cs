@@ -1,5 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using SGA_Smash.Services;
 
 namespace SGA_Smash.Models
 {
@@ -18,8 +21,9 @@ namespace SGA_Smash.Models
         [Required, DataType(DataType.Date), Column("fecha_fin")]
         public DateTime FechaFin { get; set; }
 
+        /// Pendiente | Aprobada | Rechazada
         [Required, StringLength(50), Column("estado")]
-        public string Estado { get; set; } = "Pendiente"; // Pendiente | Aprobada | Rechazada
+        public string Estado { get; set; } = "Pendiente";
 
         [Required, Column("dias_solicitados")]
         public int DiasSolicitados { get; set; }
@@ -33,9 +37,6 @@ namespace SGA_Smash.Models
         [ForeignKey(nameof(EmpleadoId))]
         public Empleado? Empleado { get; set; }
 
-        [ForeignKey(nameof(AprobadoPor))]
-        public Empleado? Aprobador { get; set; }
-
         [NotMapped]
         public int DiasCalculados => (int)(FechaFin.Date - FechaInicio.Date).TotalDays + 1;
 
@@ -47,8 +48,25 @@ namespace SGA_Smash.Models
             if (DiasSolicitados <= 0)
                 yield return new ValidationResult("Los días solicitados deben ser mayores a cero.", new[] { nameof(DiasSolicitados) });
 
+            if (DiasSolicitados != DiasCalculados)
+                yield return new ValidationResult(
+                    $"Los días solicitados ({DiasSolicitados}) no coinciden con el rango de fechas ({DiasCalculados}).",
+                    new[] { nameof(DiasSolicitados), nameof(FechaInicio), nameof(FechaFin) });
+
+            var estadoOk = Estado == "Pendiente" || Estado == "Aprobada" || Estado == "Rechazada";
+            if (!estadoOk)
+                yield return new ValidationResult("El estado debe ser Pendiente, Aprobada o Rechazada.", new[] { nameof(Estado) });
+
             if (Estado == "Aprobada" && AprobadoPor == null)
                 yield return new ValidationResult("Debe indicar quién aprobó la solicitud.", new[] { nameof(AprobadoPor) });
+
+            var policy = validationContext.GetService(typeof(IVacacionPolicyService)) as IVacacionPolicyService;
+            if (policy != null && Estado == "Pendiente")
+            {
+                var (ok, error, _) = policy.ValidarSolicitudAsync(EmpleadoId, FechaInicio, FechaFin).GetAwaiter().GetResult();
+                if (!ok && !string.IsNullOrWhiteSpace(error))
+                    yield return new ValidationResult(error, new[] { nameof(FechaInicio), nameof(FechaFin) });
+            }
         }
     }
 }

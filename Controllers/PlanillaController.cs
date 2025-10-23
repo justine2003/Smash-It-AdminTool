@@ -10,12 +10,18 @@ namespace SGA_Smash.Controllers
     {
         private readonly IPlanillaRepository _planillaRepository;
         private readonly IEmpleadoRepository _empleadoRepository;
+        private readonly IPlanillaCalculoService _calculoService;
 
-        public PlanillaController(IPlanillaRepository planillaRepository, IEmpleadoRepository empleadoRepository)
+        public PlanillaController(IPlanillaRepository planillaRepository,
+                                IEmpleadoRepository empleadoRepository,
+                                IPlanillaCalculoService calculoService)
         {
             _planillaRepository = planillaRepository;
             _empleadoRepository = empleadoRepository;
+            _calculoService = calculoService;
         }
+
+        
 
         private async Task LoadEmpleadosAsync(int? selectedId = null)
         {
@@ -52,6 +58,11 @@ namespace SGA_Smash.Controllers
                 return View(planilla);
             }
 
+            var (ded, bon) = await _calculoService.CalcularConceptosActivosAsync(planilla.EmpleadoId);
+            planilla.Deducciones = ded;
+            planilla.Bonificaciones = bon;
+
+            // Salario neto se calcula por tu modelo (TotalPago/prop calculada)
             await _planillaRepository.AddAsync(planilla);
             TempData["Success"] = "Planilla registrada con éxito.";
             return RedirectToAction(nameof(Index));

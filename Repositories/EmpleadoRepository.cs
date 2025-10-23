@@ -49,5 +49,25 @@ namespace SGA_Smash.Repositories
         {
             return await _context.Empleados.AnyAsync(e => e.Id == id);
         }
+
+        public async Task<int> GetDiasDisponiblesAsync(int empleadoId)
+        {
+            var empleado = await _context.Set<Empleado>()
+                .AsNoTracking()
+                .Where(e => e.Id == empleadoId)
+                .Select(e => e.DiasVacacionesDisponibles)
+                .FirstOrDefaultAsync();
+
+            return empleado; // si no existe, devolverá 0
+        }
+
+        public async Task SetDiasDisponiblesAsync(int empleadoId, int nuevosDias)
+        {
+            var empleado = await _context.Set<Empleado>().FirstOrDefaultAsync(e => e.Id == empleadoId);
+            if (empleado == null) return;
+
+            empleado.DiasVacacionesDisponibles = nuevosDias < 0 ? 0 : nuevosDias;
+            await _context.SaveChangesAsync();
+        }
     }
 }

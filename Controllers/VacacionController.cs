@@ -1,94 +1,110 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Models;
 using SGA_Smash.Repositories;
+using SGA_Smash.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace SGA_Smash.Controllers
 {
+    //[Authorize]
     public class VacacionController : Controller
     {
-        private readonly IVacacionRepository _vacacionRepository;
-        private readonly IEmpleadoRepository _empleadoRepository;
+        private readonly IVacacionRepository _vacaciones;
+        private readonly IVacacionPolicyService _policy;
 
-        public VacacionController(IVacacionRepository vacacionRepository, IEmpleadoRepository empleadoRepository)
+        public VacacionController(IVacacionRepository vacaciones,
+                                  IVacacionPolicyService policy)
         {
-            _vacacionRepository = vacacionRepository;
-            _empleadoRepository = empleadoRepository;
-        }
-
-        private async Task LoadCombosAsync(int? empleadoId = null, int? aprobadorId = null, string estado = null)
-        {
-            var empleados = await _empleadoRepository.GetAllEmpleadosAsync();
-            ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre", empleadoId);
-            ViewBag.Aprobadores = new SelectList(empleados, "Id", "Nombre", aprobadorId);
-
-            var estados = new[] { "Pendiente", "Aprobada", "Rechazada" };
-            ViewBag.Estados = new SelectList(estados, estado);
+            _vacaciones = vacaciones;
+            _policy = policy;
         }
 
         public async Task<IActionResult> Index()
         {
-            var items = await _vacacionRepository.GetAllAsync();
+            var items = await _vacaciones.GetAllAsync();
             return View(items);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var item = await _vacacionRepository.GetByIdAsync(id);
+            var item = await _vacaciones.GetByIdAsync(id);
             if (item == null) return NotFound();
             return View(item);
         }
 
-        public async Task<IActionResult> Create()
+        public IActionResult Create(int? empleadoId = null)
         {
-            await LoadCombosAsync();
-            return View();
+            return View(new Vacacion {
+                EmpleadoId = empleadoId ?? 0,
+                FechaInicio = DateTime.Today,
+                FechaFin = DateTime.Today,
+                Estado = "Pendiente"
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Vacacion vacacion)
+        public async Task<IActionResult> Create(Vacacion model)
         {
+            model.DiasSolicitados = model.DiasCalculados;
+            model.Estado = "Pendiente";
+            model.FechaSolicitud = DateTime.Today;
+
             if (!ModelState.IsValid)
+                return View(model);
+
+            var (ok, error, _) = await _policy.ValidarSolicitudAsync(model.EmpleadoId, model.FechaInicio, model.FechaFin);
+            if (!ok)
             {
-                await LoadCombosAsync(vacacion.EmpleadoId, vacacion.AprobadoPor, vacacion.Estado);
-                return View(vacacion);
+                ModelState.AddModelError(string.Empty, error ?? "No se pudo validar la solicitud.");
+                return View(model);
             }
 
-            await _vacacionRepository.AddAsync(vacacion);
+            await _vacaciones.AddAsync(model);
             TempData["Success"] = "Solicitud de vacaciones registrada con éxito.";
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            var item = await _vacacionRepository.GetByIdAsync(id);
+            var item = await _vacaciones.GetByIdAsync(id);
             if (item == null) return NotFound();
-
-            await LoadCombosAsync(item.EmpleadoId, item.AprobadoPor, item.Estado);
+            if (item.Estado != "Pendiente")
+            {
+                TempData["Error"] = "Solo se pueden editar solicitudes en estado Pendiente.";
+                return RedirectToAction(nameof(Index));
+            }
             return View(item);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Vacacion vacacion)
+        public async Task<IActionResult> Edit(int id, Vacacion model)
         {
-            if (id != vacacion.Id) return NotFound();
+            if (id != model.Id) return NotFound();
+
+            model.DiasSolicitados = model.DiasCalculados;
 
             if (!ModelState.IsValid)
+                return View(model);
+
+            var (ok, error, _) = await _policy.ValidarSolicitudAsync(model.EmpleadoId, model.FechaInicio, model.FechaFin);
+            if (!ok)
             {
-                await LoadCombosAsync(vacacion.EmpleadoId, vacacion.AprobadoPor, vacacion.Estado);
-                return View(vacacion);
+                ModelState.AddModelError(string.Empty, error ?? "No se pudo validar la solicitud.");
+                return View(model);
             }
 
             try
             {
-                await _vacacionRepository.UpdateAsync(vacacion);
+                await _vacaciones.UpdateAsync(model);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _vacacionRepository.ExistsAsync(vacacion.Id)) return NotFound();
+                if (!await _vacaciones.ExistsAsync(model.Id)) return NotFound();
                 else throw;
             }
 
@@ -98,7 +114,7 @@ namespace SGA_Smash.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var item = await _vacacionRepository.GetByIdAsync(id);
+            var item = await _vacaciones.GetByIdAsync(id);
             if (item == null) return NotFound();
             return View(item);
         }
@@ -107,9 +123,118 @@ namespace SGA_Smash.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _vacacionRepository.DeleteAsync(id);
+            await _vacaciones.DeleteAsync(id);
             TempData["Success"] = "Solicitud de vacaciones eliminada con éxito.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // ------ Aprobación (solo Admin) ------
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Aprobar(int id)
+        {
+            var v = await _vacaciones.GetByIdAsync(id);
+            if (v == null) return NotFound();
+            if (v.Estado != "Pendiente")
+            {
+                TempData["Error"] = "Solo se pueden aprobar solicitudes en estado Pendiente.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var aprobadorId = 0; // si luego mapeas usuario->empleado, coloca su Id
+            await _vacaciones.ApproveAsync(v, aprobadorId);
+            await _policy.AplicarAprobacionAsync(v.Id);
+
+            TempData["Success"] = "Solicitud aprobada y días descontados.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        //[Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Rechazar(int id)
+        {
+            var v = await _vacaciones.GetByIdAsync(id);
+            if (v == null) return NotFound();
+            if (v.Estado != "Pendiente")
+            {
+                TempData["Error"] = "Solo se pueden rechazar solicitudes en estado Pendiente.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var aprobadorId = 0;
+            await _vacaciones.RejectAsync(v, aprobadorId);
+
+            TempData["Success"] = "Solicitud rechazada.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminPendientes()
+        {
+            var items = await _vacaciones.GetPendientesAsync();
+            return View(items); // Views/Vacacion/AdminPendientes.cshtml
+        }
+
+        //[Authorize] // cualquier user logueado
+        public async Task<IActionResult> MisSolicitudes(int empleadoId)
+        {
+            var items = await _vacaciones.GetByEmpleadoAsync(empleadoId);
+            ViewBag.EmpleadoId = empleadoId;
+            return View(items); // Views/Vacacion/MisSolicitudes.cshtml
+        }
+
+        // GET: /Vacacion/Solicitar?empleadoId=123
+        //[Authorize]
+        [HttpGet]
+        public IActionResult Solicitar(int empleadoId)
+        {
+            // Deja el formulario listo con valores iniciales
+            var vm = new Vacacion
+            {
+                EmpleadoId = empleadoId,
+                FechaInicio = DateTime.Today,
+                FechaFin = DateTime.Today,
+                Estado = "Pendiente"
+            };
+
+            // Si usas el cálculo en el front para mostrar días, esto es opcional
+            vm.DiasSolicitados = vm.DiasCalculados;
+
+            return View(vm); // Views/Vacacion/Solicitar.cshtml
+        }
+
+        // POST: /Vacacion/Solicitar
+        //[Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Solicitar(Vacacion model)
+        {
+            // Fuerza los valores que no deben venir del cliente
+            model.DiasSolicitados = model.DiasCalculados;
+            model.Estado = "Pendiente";
+            model.FechaSolicitud = DateTime.Today;
+
+            // 1) Validaciones por DataAnnotations + IValidatableObject
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // 2) Reglas de negocio (días disponibles + no superposición)
+            var (ok, error, _) = await _policy.ValidarSolicitudAsync(model.EmpleadoId, model.FechaInicio, model.FechaFin);
+            if (!ok)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "No se pudo validar la solicitud de vacaciones.");
+                return View(model);
+            }
+
+            // 3) Guardar
+            await _vacaciones.AddAsync(model);
+
+            // 4) Confirmación y redirección a "MisSolicitudes"
+            TempData["Success"] = "Solicitud enviada y marcada como Pendiente.";
+            return RedirectToAction(nameof(MisSolicitudes), new { empleadoId = model.EmpleadoId });
         }
     }
 }
