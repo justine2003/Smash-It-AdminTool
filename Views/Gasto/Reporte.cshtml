@@ -1,0 +1,117 @@
+﻿@model IEnumerable<SGA_Smash.Models.Gasto>
+
+@{
+    ViewData["Title"] = "Reporte de Gastos";
+    string desdeVal = ViewBag.Desde ?? "";
+    string hastaVal = ViewBag.Hasta ?? "";
+    string tipoVal = ViewBag.Tipo ?? "";
+    var tipos = ViewBag.Tipos as List<string> ?? new List<string>();
+    long elapsed = ViewBag.ElapsedMs != null ? Convert.ToInt64(ViewBag.ElapsedMs) : 0;
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Reporte de Gastos</h3>
+            <small class="text-muted">Generado en @elapsed ms</small>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Desde</label>
+                    <input type="date" name="desde" class="form-control" value="@desdeVal" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" name="hasta" class="form-control" value="@hastaVal" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoría</label>
+                    <select name="tipo" class="form-select">
+                        <option value="">(Todas)</option>
+
+                        @foreach (var t in tipos)
+                        {
+                            @if (t == tipoVal)
+                            {
+                                <option value="@t" **selected**>@t</option>
+                            }
+                            else
+                            {
+                                <option value="@t">@t</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+
+                    @{
+                        var routeValues = new { desde = desdeVal, hasta = hastaVal, tipo = tipoVal };
+                    }
+
+                    <a href="@Url.Action("ExportExcel", "Gasto", routeValues)"
+                       class="btn btn-success w-100">
+                        <i class="ti ti-file-spreadsheet me-1"></i> Excel
+                    </a>
+
+                    <a href="@Url.Action("ExportPdf", "Gasto", routeValues)"
+                       class="btn btn-danger w-100">
+                        <i class="ti ti-file-type-pdf me-1"></i> PDF
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center text-muted py-5">No hay gastos para el filtro seleccionado.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Categoría</th>
+                                <th class="text-end">Monto</th>
+                                <th>Descripción</th>
+                                <th>Registrado Por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                decimal total = 0;
+                            }
+                            @foreach (var g in Model)
+                            {
+                                total += g.Monto;
+                                <tr>
+                                    <td>@g.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@g.Tipo</td>
+                                    <td class="text-end">@g.Monto.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                    <td>@g.Descripcion</td>
+                                    <td>@g.RegistradoPor</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="2">Totales</th>
+                                <th class="text-end">@total.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
