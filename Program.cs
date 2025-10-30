@@ -21,6 +21,7 @@ builder.Services.AddScoped<IHistorialPagosService, HistorialPagosService>();
 builder.Services.AddScoped<IConceptoNominaRepository, ConceptoNominaRepository>();
 builder.Services.AddScoped<IPlanillaCalculoService, PlanillaCalculoService>();
 builder.Services.AddScoped<IVacacionRepository, VacacionRepository>();
+builder.Services.AddScoped<IContratoProveedorRepository, ContratoProveedorRepository>();
 // Services
 builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
 builder.Services.AddScoped<INotificationService, EmailNotificationService>();

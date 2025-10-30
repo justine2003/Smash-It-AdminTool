@@ -20,6 +20,11 @@ namespace SGA_Smash.Data
         public DbSet<Usuario> Usuario { get; set; }
         public DbSet<Planilla> Planillas { get; set; }
         public DbSet<Vacacion> Vacaciones { get; set; }
+        public DbSet<ContratoProveedor> ContratoProveedores { get; set; }
+
+     
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -104,6 +109,27 @@ namespace SGA_Smash.Data
                     .OnDelete(DeleteBehavior.NoAction);
                 // NO navegación para AprobadoPor
             });
+
+            //Configuración para ContratoProveedor
+            modelBuilder.Entity<ContratoProveedor>(entity =>
+            {
+                entity.ToTable("ContratoProveedor");
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Id).HasColumnName("id");
+                entity.Property(c => c.ProveedorId).HasColumnName("proveedor_id");
+                entity.Property(c => c.FechaInicio).HasColumnName("fecha_inicio");
+                entity.Property(c => c.FechaFin).HasColumnName("fecha_fin");
+                entity.Property(c => c.MontoTotal).HasColumnName("monto_total").HasColumnType("decimal(18,2)");
+                entity.Property(c => c.Estado).HasColumnName("estado");
+                entity.Property(c => c.RutaArchivo).HasColumnName("ruta_archivo");
+                entity.HasOne(c => c.Proveedor)
+                      .WithMany()
+                      .HasForeignKey(c => c.ProveedorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+     
+
 
 
         }

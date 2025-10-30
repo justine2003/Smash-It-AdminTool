@@ -1,4 +1,6 @@
 CREATE DATABASE Proyecto_SGA_SMASH;
+DROP DATABASE Proyecto_SGA_SMASH;
+
 USE Proyecto_SGA_SMASH;
 
 -- Tabla Roles
@@ -10,7 +12,7 @@ CREATE TABLE Roles (
 
 
 -- Tabla Empleado
-CREATE TABLE Empleado (
+    CREATE TABLE Empleado (
     id INT PRIMARY KEY IDENTITY(1,1),
     Nombre VARCHAR(100) NOT NULL,
     Puesto VARCHAR(100),
@@ -74,6 +76,7 @@ CREATE TABLE Reservacion (
     mesa VARCHAR(50),
     estado VARCHAR(50),
     registrado_por INT,
+    numero_personas int NOT NULL DEFAULT 1,
     FOREIGN KEY (cliente_id) REFERENCES Cliente(id),
     FOREIGN KEY (registrado_por) REFERENCES Usuario(id)
 );
@@ -95,7 +98,8 @@ CREATE TABLE Proveedor (
     nombre VARCHAR(100) NOT NULL,
     contacto VARCHAR(100),
     telefono VARCHAR(20),
-    correo VARCHAR(100)
+    correo VARCHAR(100),
+    estado bit NOT NULL DEFAULT 1,
 );
 
 -- La Tabla Categoria
@@ -141,15 +145,19 @@ CREATE TABLE Producto_Proveedor (
     FOREIGN KEY (proveedor_id) REFERENCES Proveedor(id)
 );
 
---Agegar estado a tabla proovedor
-ALTER TABLE Proveedor
-ADD estado BIT NOT NULL DEFAULT 1;
-
---Agregar numero de personas a tabla reservacion
-ALTER TABLE Reservacion
-ADD numero_personas INT NOT NULL DEFAULT 1;
-
-
 
 ALTER TABLE Empleado ADD dias_vacaciones_disponibles INT NOT NULL DEFAULT 0;
+
+--Tabla Contrato
+CREATE TABLE ContratoProveedor (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    proveedor_id INT NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    monto_total DECIMAL(12,2),
+    estado VARCHAR(20) CHECK (estado IN ('Vigente', 'Vencido', 'Cancelado')),
+    ruta_archivo NVARCHAR(255), 
+    fecha_creacion DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (proveedor_id) REFERENCES Proveedor(id)
+);
 
