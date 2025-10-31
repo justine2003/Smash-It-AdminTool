@@ -7,13 +7,16 @@
 
             <dl class="row">
                 <dt class="col-sm-3">Cliente</dt>
-                <dd class="col-sm-9">@Model.Cliente</dd>
+                <dd class="col-sm-9">@Model.Cliente?.Nombre</dd>
 
                 <dt class="col-sm-3">Fecha y Hora</dt>
                 <dd class="col-sm-9">@Model.FechaHora.ToString("dd/MM/yyyy HH:mm")</dd>
 
                 <dt class="col-sm-3">Mesa</dt>
                 <dd class="col-sm-9">@Model.Mesa</dd>
+
+                <dt class="col-sm-3">Numero de personas</dt>
+                <dd class="col-sm-9">@Model.NumeroPersonas</dd>
 
                 <dt class="col-sm-3">Estado</dt>
                 <dd class="col-sm-9">@Model.Estado</dd>

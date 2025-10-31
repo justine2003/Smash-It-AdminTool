@@ -1,0 +1,149 @@
+﻿@model IEnumerable<SGA_Smash.Models.ContratoProveedor>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Success"]</div>
+                    }
+
+                    <div class="d-md-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            @if (ViewBag.ProveedorId != null)
+                            {
+                                <h4 class="card-title">Contratos de @ViewBag.ProveedorNombre</h4>
+                                <p class="card-subtitle">Contratos específicos de este proveedor</p>
+                                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                                    <i class="ti ti-arrow-left me-1"></i> Ver Todos los Contratos
+                                </a>
+                            }
+                            else
+                            {
+                                <h4 class="card-title">Contratos de Proveedores</h4>
+                                <p class="card-subtitle">Lista de contratos registrados en el sistema</p>
+                            }
+                        </div>
+                        <div>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="ti ti-plus me-1"></i> Nuevo Contrato
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Buscador -->
+                    <form method="get" asp-action="Index" class="mb-3">
+                        @if (ViewBag.ProveedorId != null)
+                        {
+                            <input type="hidden" name="proveedorId" value="@ViewBag.ProveedorId" />
+                        }
+                        <div class="input-group">
+                            <input type="text" name="filtro" value="@ViewBag.Filtro" class="form-control" placeholder="Buscar por proveedor o estado..." />
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="ti ti-search"></i> Buscar
+                            </button>
+                            <a asp-action="Index" asp-route-proveedorId="@ViewBag.ProveedorId" class="btn btn-outline-secondary">
+                                <i class="ti ti-x"></i> Limpiar
+                            </a>
+                        </div>
+                    </form>
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive mt-3">
+                            <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
+                                <thead>
+                                    <tr>
+                                        <th class="px-0 text-muted">Proveedor</th>
+                                        <th class="px-0 text-muted">Fecha Inicio</th>
+                                        <th class="px-0 text-muted">Fecha Fin</th>
+                                        <th class="px-0 text-muted">Monto Total</th>
+                                        <th class="px-0 text-muted">Estado</th>
+                                        <th class="px-0 text-muted text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var contrato in Model)
+                                    {
+                                        <tr>
+                                            <td class="px-0"><strong>@contrato.Proveedor?.Nombre</strong></td>
+                                            <td class="px-0">@contrato.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                            <td class="px-0">@contrato.FechaFin.ToString("dd/MM/yyyy")</td>
+                                            <td class="px-0">$@contrato.MontoTotal.ToString("N2")</td>
+                                            <td class="px-0">
+                                                @switch (contrato.Estado?.ToLower())
+                                                {
+                                                    case "activo":
+                                                        <span class="badge bg-success">Activo</span>
+                                                        break;
+                                                    case "vencido":
+                                                        <span class="badge bg-danger">Vencido</span>
+                                                        break;
+                                                    case "finalizado":
+                                                        <span class="badge bg-secondary">Finalizado</span>
+                                                        break;
+                                                    case "pendiente":
+                                                        <span class="badge bg-warning">Pendiente</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-light text-dark">@contrato.Estado</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td class="px-0 text-end">
+                                                @if (!string.IsNullOrEmpty(contrato.RutaArchivo))
+                                                {
+                                                    <a asp-action="Download" asp-route-id="@contrato.Id" class="btn btn-sm btn-info me-1" title="Descargar PDF">
+                                                        <i class="ti ti-download"></i>
+                                                    </a>
+                                                }
+                                                <a asp-action="Edit" asp-route-id="@contrato.Id" class="btn btn-sm btn-warning me-1" title="Editar">
+                                                    <i class="ti ti-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@contrato.Id" class="btn btn-sm btn-danger" title="Eliminar">
+                                                    <i class="ti ti-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginación -->
+                        @if (ViewBag.TotalPaginas > 1)
+                        {
+                            <nav aria-label="Paginación de contratos" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                                    {
+                                        <li class="page-item @(ViewBag.PaginaActual == i ? "active" : "")">
+                                            <a class="page-link" asp-action="Index" asp-route-pagina="@i" asp-route-filtro="@ViewBag.Filtro" asp-route-proveedorId="@ViewBag.ProveedorId">@i</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="ti ti-file-contract text-muted" style="font-size: 4rem;"></i>
+                            <h5 class="text-muted mt-3">No hay contratos registrados</h5>
+                            <p class="text-muted">Comienza agregando tu primer contrato de proveedor al sistema.</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="ti ti-plus me-1"></i> Agregar Primer Contrato
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

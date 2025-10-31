@@ -1,0 +1,85 @@
+﻿@model SGA_Smash.Models.ContratoProveedor
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-6 mx-auto">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    <div class="text-center mb-4">
+                        <i class="ti ti-alert-triangle text-warning" style="font-size: 4rem;"></i>
+                        <h4 class="card-title mt-3">¿Eliminar Contrato?</h4>
+                        <p class="text-muted">Esta acción no se puede deshacer.</p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="ti ti-info-circle me-2"></i>Información del Contrato</h6>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Proveedor:</strong></div>
+                            <div class="col-sm-8">@Model.Proveedor?.Nombre</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Fecha Inicio:</strong></div>
+                            <div class="col-sm-8">@Model.FechaInicio.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Fecha Fin:</strong></div>
+                            <div class="col-sm-8">@Model.FechaFin.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Monto Total:</strong></div>
+                            <div class="col-sm-8">$@Model.MontoTotal.ToString("N2")</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Estado:</strong></div>
+                            <div class="col-sm-8">
+                                @switch (Model.Estado?.ToLower())
+                                {
+                                    case "activo":
+                                        <span class="badge bg-success">Activo</span>
+                                        break;
+                                    case "vencido":
+                                        <span class="badge bg-danger">Vencido</span>
+                                        break;
+                                    case "finalizado":
+                                        <span class="badge bg-secondary">Finalizado</span>
+                                        break;
+                                    case "pendiente":
+                                        <span class="badge bg-warning">Pendiente</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-light text-dark">@Model.Estado</span>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.RutaArchivo))
+                        {
+                            <div class="row mt-2">
+                                <div class="col-sm-4"><strong>Archivo:</strong></div>
+                                <div class="col-sm-8">@Model.RutaArchivo</div>
+                            </div>
+                        }
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-center gap-2">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="ti ti-x me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="ti ti-trash me-1"></i> Eliminar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Models;
 using SGA_Smash.Repositories;
-using System.Threading.Tasks;
 
 namespace SGA_Smash.Controllers
 {

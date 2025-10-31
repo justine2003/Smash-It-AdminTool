@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Models;

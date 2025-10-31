@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using SGA_Smash.Services;
 
-namespace SGA_Smash.Models
-{
+namespace SGA_Smash.Models;
+
     [Table("Vacacion")]
     public class Vacacion : IValidatableObject
     {
@@ -69,4 +69,5 @@ namespace SGA_Smash.Models
             }
         }
     }
-}
+
+

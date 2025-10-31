@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Models;
-using System.Linq;
 
 namespace SGA_Smash.Controllers;
 

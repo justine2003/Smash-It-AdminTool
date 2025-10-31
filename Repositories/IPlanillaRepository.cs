@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using SGA_Smash.Models;
 
 namespace SGA_Smash.Repositories

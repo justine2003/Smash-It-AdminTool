@@ -28,5 +28,8 @@ namespace SGA_Smash.Models
         [StringLength(100, ErrorMessage = "El correo no puede exceder 100 caracteres")]
         [Column("correo")]
         public string Correo { get; set; }
+
+        [Column("estado")]
+        public bool Estado { get; set; } = true; // true = Activo, false = Inactivo
     }
 }

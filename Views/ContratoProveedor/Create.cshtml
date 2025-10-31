@@ -1,0 +1,134 @@
+﻿@model SGA_Smash.Models.ContratoProveedor
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card rounded-3">
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Success"]</div>
+                    }
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-warning">
+                            <strong>Errores de validación:</strong>
+                            <ul>
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <h4 class="card-title mb-4">Registrar Contrato de Proveedor</h4>
+
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="ProveedorId" class="form-label">Proveedor *</label>
+                            <select asp-for="ProveedorId" class="form-select" asp-items="ViewBag.Proveedores">
+                                <option value="">Seleccione un proveedor</option>
+                            </select>
+                            <span asp-validation-for="ProveedorId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FechaInicio" class="form-label">Fecha de Inicio *</label>
+                                    <input asp-for="FechaInicio" type="date" class="form-control" />
+                                    <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FechaFin" class="form-label">Fecha de Fin *</label>
+                                    <input asp-for="FechaFin" type="date" class="form-control" />
+                                    <span asp-validation-for="FechaFin" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MontoTotal" class="form-label">Monto Total</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="MontoTotal" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                            </div>
+                            <span asp-validation-for="MontoTotal" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Estado" class="form-label">Estado</label>
+                            <select asp-for="Estado" class="form-select">
+                                <option value="">Seleccione un estado</option>
+                                <option value="Vigente">Vigente</option>
+                                <option value="Vencido">Vencido</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                            <span asp-validation-for="Estado" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="archivoContrato" class="form-label">Archivo del Contrato (PDF)</label>
+                            <input type="file" id="archivoContrato" name="archivoContrato" accept=".pdf" class="form-control" />
+                            <div class="form-text">Solo se permiten archivos PDF. Tamaño máximo: 10MB</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.getElementById('archivoContrato').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar extensión
+                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                    alert('Solo se permiten archivos PDF.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validar tamaño (10MB)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    alert('El archivo es demasiado grande. El tamaño máximo permitido es 10MB.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Mostrar información del archivo
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'form-text text-success';
+                fileInfo.innerHTML = `<i class="ti ti-check-circle me-1"></i>Archivo válido: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                
+                // Remover información anterior
+                const existingInfo = e.target.parentNode.querySelector('.text-success');
+                if (existingInfo) {
+                    existingInfo.remove();
+                }
+                
+                e.target.parentNode.appendChild(fileInfo);
+            }
+        });
+    </script>
+}
