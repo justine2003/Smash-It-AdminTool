@@ -22,6 +22,7 @@ namespace SGA_Smash.Data
         public DbSet<Vacacion> Vacaciones { get; set; }
         public DbSet<ContratoProveedor> ContratoProveedores { get; set; }
         public DbSet<Gasto> Gastos { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

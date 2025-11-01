@@ -1,12 +1,19 @@
+using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
+using SGA_Smash.Data;
 using SGA_Smash.Models;
+using System.Threading.Tasks;
 
 namespace SGA_Smash.Controllers
 {
     public class AccountController : Controller
     {
-        // Datos quemados de usuarios
-        private static readonly List<string> UsuariosPermitidos = new List<string> { "admin", "gerente", "cajero" };
+        private readonly ApplicationDbContext _context;
+
+        public AccountController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public IActionResult Login()
@@ -15,15 +22,26 @@ namespace SGA_Smash.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid && UsuariosPermitidos.Contains(model.Usuario.ToLower()))
+            if (ModelState.IsValid)
             {
-                TempData["Usuario"] = model.Usuario;
-                return RedirectToAction("Index", "Home");
+                var usuario = _context.Usuarios.FirstOrDefault(p => p.Nombre == model.Usuario);
+
+                if (usuario != null) 
+                {
+                    bool contrasena = BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena);
+
+                    if (contrasena)
+                    {
+                        TempData["Usuario"] = model.Usuario;
+                        TempData["rol"] = model.Rol;
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
             }
 
-            ViewBag.Mensaje = "Usuario no válido";
+            ViewBag.Mensaje = "Usuario o contraseña no válido";
             return View(model);
         }
 
