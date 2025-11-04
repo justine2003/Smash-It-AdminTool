@@ -6,68 +6,84 @@ namespace SGA_Smash.Repositories
 {
     public class EmpleadoRepository : IEmpleadoRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _db;
 
-        public EmpleadoRepository(ApplicationDbContext context)
+        public EmpleadoRepository(ApplicationDbContext db)
         {
-            _context = context;
+            _db = db;
         }
 
-        public async Task<IEnumerable<Empleado>> GetAllEmpleadosAsync()
-        {
-            return await _context.Empleados.ToListAsync();
-        }
+        // Si usas estos dos en otros lugares, los dejo:
+        public async Task<IEnumerable<Empleado>> GetAllAsync() =>
+            await _db.Empleados
+                     .AsNoTracking()
+                     .Where(e => e.Activo)
+                     .OrderBy(e => e.Nombre)
+                     .ToListAsync();
+
+        public Task<Empleado?> GetByIdAsync(int id) =>
+            _db.Empleados
+               .AsNoTracking()
+               .FirstOrDefaultAsync(e => e.Id == id);
+
+        // Métodos solicitados por tu controlador actual
+        public async Task<IEnumerable<Empleado>> GetAllEmpleadosAsync() =>
+            await _db.Empleados
+                     .AsNoTracking()
+                     .OrderBy(e => e.Nombre)
+                     .ToListAsync();
 
         public async Task<Empleado> GetEmpleadoByIdAsync(int id)
         {
-            return await _context.Empleados.FindAsync(id);
+            // Si quieres no-tracking:
+            var emp = await _db.Empleados
+                               .AsNoTracking()
+                               .FirstOrDefaultAsync(e => e.Id == id);
+            return emp!;
         }
 
         public async Task AddEmpleadoAsync(Empleado empleado)
         {
-            _context.Empleados.Add(empleado);
-            await _context.SaveChangesAsync();
+            _db.Empleados.Add(empleado);
+            await _db.SaveChangesAsync();
         }
 
         public async Task UpdateEmpleadoAsync(Empleado empleado)
         {
-            _context.Entry(empleado).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _db.Entry(empleado).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
         }
 
         public async Task DeleteEmpleadoAsync(int id)
         {
-            var empleado = await _context.Empleados.FindAsync(id);
-            if (empleado != null)
-            {
-                _context.Empleados.Remove(empleado);
-                await _context.SaveChangesAsync();
-            }
+            var empleado = await _db.Empleados.FindAsync(id);
+            if (empleado is null) return;
+
+            _db.Empleados.Remove(empleado);
+            await _db.SaveChangesAsync();
         }
 
-        public async Task<bool> EmpleadoExistsAsync(int id)
-        {
-            return await _context.Empleados.AnyAsync(e => e.Id == id);
-        }
+        public Task<bool> EmpleadoExistsAsync(int id) =>
+            _db.Empleados.AnyAsync(e => e.Id == id);
 
+        // Soporte para vacaciones
         public async Task<int> GetDiasDisponiblesAsync(int empleadoId)
         {
-            var empleado = await _context.Set<Empleado>()
-                .AsNoTracking()
-                .Where(e => e.Id == empleadoId)
-                .Select(e => e.DiasVacacionesDisponibles)
-                .FirstOrDefaultAsync();
-
-            return empleado; // si no existe, devolverá 0
+            var dias = await _db.Empleados
+                                .AsNoTracking()
+                                .Where(e => e.Id == empleadoId)
+                                .Select(e => e.DiasVacacionesDisponibles)
+                                .FirstOrDefaultAsync();
+            return dias; // 0 si no existe
         }
 
         public async Task SetDiasDisponiblesAsync(int empleadoId, int nuevosDias)
         {
-            var empleado = await _context.Set<Empleado>().FirstOrDefaultAsync(e => e.Id == empleadoId);
-            if (empleado == null) return;
+            var empleado = await _db.Empleados.FirstOrDefaultAsync(e => e.Id == empleadoId);
+            if (empleado is null) return;
 
             empleado.DiasVacacionesDisponibles = nuevosDias < 0 ? 0 : nuevosDias;
-            await _context.SaveChangesAsync();
+            await _db.SaveChangesAsync();
         }
     }
 }

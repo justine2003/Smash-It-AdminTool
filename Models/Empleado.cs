@@ -6,33 +6,22 @@ namespace SGA_Smash.Models
     [Table("Empleado")]
     public class Empleado
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column("id")]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
-        public string Nombre { get; set; }
+        [Required, StringLength(120), Column("nombre")]
+        public string Nombre { get; set; } = string.Empty;
 
-        [StringLength(100, ErrorMessage = "El puesto no puede exceder 100 caracteres")]
-        public string Puesto { get; set; }
+        [StringLength(40), Column("identificacion")]
+        public string? Identificacion { get; set; }
 
-        [Required(ErrorMessage = "El salario base es obligatorio")]
-        [Range(0, double.MaxValue, ErrorMessage = "El salario debe ser mayor a 0")]
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal SalarioBase { get; set; }
+        [Required, Column("dias_vacaciones_disponibles")]
+        public int DiasVacacionesDisponibles { get; set; } = 0;
 
-        [Required(ErrorMessage = "La fecha de ingreso es obligatoria")]
-        [Display(Name = "Fecha de Ingreso")]
-        [DataType(DataType.Date)]
-        public DateTime FechaIngreso { get; set; }
+        [Column("fecha_ingreso")]
+        public DateTime? FechaIngreso { get; set; }
 
-        [Required(ErrorMessage = "El estado es obligatorio")]
-        [StringLength(50, ErrorMessage = "El estado no puede exceder 50 caracteres")]
-        public string Estado { get; set; }
-
-        [Column("dias_vacaciones_disponibles")]
-        [Range(0, int.MaxValue, ErrorMessage = "Los días disponibles deben ser >= 0")]
-        public int DiasVacacionesDisponibles { get; set; }
+        [Required, Column("activo")]
+        public bool Activo { get; set; } = true;
     }
 }

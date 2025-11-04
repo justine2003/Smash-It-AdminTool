@@ -4,6 +4,8 @@ namespace SGA_Smash.Repositories
 {
     public interface IEmpleadoRepository
     {
+        Task<IEnumerable<Empleado>> GetAllAsync();
+        Task<Empleado?> GetByIdAsync(int id);
         Task<IEnumerable<Empleado>> GetAllEmpleadosAsync();
         Task<Empleado> GetEmpleadoByIdAsync(int id);
         Task AddEmpleadoAsync(Empleado empleado);

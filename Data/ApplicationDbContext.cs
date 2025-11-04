@@ -23,6 +23,8 @@ namespace SGA_Smash.Data
         public DbSet<ContratoProveedor> ContratoProveedores { get; set; }
         public DbSet<Gasto> Gastos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<ConceptoNomina> ConceptosNomina => Set<ConceptoNomina>();
+        public DbSet<ConceptoNominaLog> ConceptoNominaLogs => Set<ConceptoNominaLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,7 +34,6 @@ namespace SGA_Smash.Data
             modelBuilder.Entity<Empleado>(entity =>
             {
                 entity.ToTable("Empleado");
-                entity.Property(e => e.SalarioBase).HasColumnType("decimal(10,2)");
             });
 
             // Mantener la configuración de Cliente si la tienes
@@ -71,22 +72,14 @@ namespace SGA_Smash.Data
             modelBuilder.Entity<Planilla>(entity =>
             {
                 entity.ToTable("Planilla");
-                entity.HasKey(p => p.Id);
-
-                entity.Property(p => p.Id).HasColumnName("id");
-                entity.Property(p => p.EmpleadoId).HasColumnName("empleado_id");
-                entity.Property(p => p.Mes).HasColumnName("mes");
-                entity.Property(p => p.Anio).HasColumnName("anio");
-                entity.Property(p => p.SalarioBase).HasColumnName("salario_base").HasColumnType("decimal(10,2)");
-                entity.Property(p => p.Bonificaciones).HasColumnName("bonificaciones").HasColumnType("decimal(10,2)");
-                entity.Property(p => p.Deducciones).HasColumnName("deducciones").HasColumnType("decimal(10,2)");
-
-                
-                entity.HasOne(p => p.Empleado)
-                      .WithMany()
-                      .HasForeignKey(p => p.EmpleadoId)
-                      .HasConstraintName("FK_Planilla_Empleado");
+                entity.HasIndex(p => new { p.EmpleadoId, p.Anio, p.Mes }).IsUnique();
             });
+
+            modelBuilder.Entity<ConceptoNomina>()
+                .HasIndex(c => new { c.EmpleadoId, c.Activo });
+
+            modelBuilder.Entity<ConceptoNominaLog>()
+                .HasIndex(l => new { l.EmpleadoId, l.Fecha });
 
             modelBuilder.Entity<Vacacion>(entity =>
             {
@@ -126,7 +119,9 @@ namespace SGA_Smash.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-     
+            modelBuilder.Entity<Empleado>(e => e.ToTable("Empleado"));
+            modelBuilder.Entity<Vacacion>(e => e.ToTable("Vacacion"));
+
 
 
 

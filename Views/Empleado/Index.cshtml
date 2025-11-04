@@ -8,7 +8,7 @@
                     <div class="d-md-flex align-items-center justify-content-between">
                         <div>
                             <h4 class="card-title">Empleados Registrados</h4>
-                            <p class="card-subtitle">Lista con datos demostrativos</p>
+                            <p class="card-subtitle">Listado general de empleados</p>
                         </div>
                         <div>
                             <a asp-action="Create" class="btn btn-primary">
@@ -22,9 +22,9 @@
                             <thead>
                                 <tr>
                                     <th class="px-0 text-muted">Nombre</th>
-                                    <th class="px-0 text-muted">Puesto</th>
-                                    <th class="px-0 text-muted">Salario</th>
+                                    <th class="px-0 text-muted">Identificación</th>
                                     <th class="px-0 text-muted">Ingreso</th>
+                                    <th class="px-0 text-muted">Vacaciones disp.</th>
                                     <th class="px-0 text-muted">Estado</th>
                                     <th class="px-0 text-muted text-end">Acciones</th>
                                 </tr>
@@ -34,11 +34,15 @@
                                 {
                                     <tr>
                                         <td class="px-0">@empleado.Nombre</td>
-                                        <td class="px-0">@empleado.Puesto</td>
-                                        <td class="px-0">₡@empleado.SalarioBase.ToString("N0")</td>
-                                        <td class="px-0">@empleado.FechaIngreso.ToString("dd/MM/yyyy")</td>
+                                        <td class="px-0">@empleado.Identificacion</td>
                                         <td class="px-0">
-                                            @if (empleado.Estado == "Activo")
+                                            @(empleado.FechaIngreso.HasValue 
+                                                ? empleado.FechaIngreso.Value.ToString("dd/MM/yyyy") 
+                                                : "-")
+                                        </td>
+                                        <td class="px-0">@empleado.DiasVacacionesDisponibles</td>
+                                        <td class="px-0">
+                                            @if (empleado.Activo)
                                             {
                                                 <span class="badge bg-success">Activo</span>
                                             }
@@ -60,6 +64,7 @@
                             </tbody>
                         </table>
                     </div>
+
                 </div>
             </div>
         </div>

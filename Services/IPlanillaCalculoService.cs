@@ -1,5 +1,5 @@
 
-namespace SGA_Smash.Repositories
+namespace SGA_Smash.Services
 {
     public interface IPlanillaCalculoService
     {

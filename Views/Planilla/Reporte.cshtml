@@ -1,0 +1,68 @@
+@model IEnumerable<SGA_Smash.Models.Planilla>
+@{
+    ViewData["Title"] = "Reporte Mensual";
+    var mes = (int)ViewBag.Mes;
+    var anio = (int)ViewBag.Anio;
+    decimal totalBruto = (decimal)ViewBag.TotalBruto;
+    decimal totalDeducciones = (decimal)ViewBag.TotalDeducciones;
+    decimal totalBonificaciones = (decimal)ViewBag.TotalBonificaciones;
+    decimal totalNeto = (decimal)ViewBag.TotalNeto;
+}
+<div class="container-fluid">
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Reporte @mes/@anio</h3>
+      <div>
+        <a asp-action="ExportExcel" asp-route-mes="@mes" asp-route-anio="@anio" class="btn btn-outline-primary me-2">
+          <i class="ti ti-file-spreadsheet"></i> Exportar Excel (CSV)
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-3"><div class="card"><div class="card-body">
+      <div class="text-muted">Total Bruto</div><div class="fs-5 fw-semibold">₡@totalBruto:N0</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+      <div class="text-muted">Deducciones</div><div class="fs-5 fw-semibold">₡@totalDeducciones:N0</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+      <div class="text-muted">Bonificaciones</div><div class="fs-5 fw-semibold">₡@totalBonificaciones:N0</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+      <div class="text-muted">Total Neto</div><div class="fs-5 fw-semibold">₡@totalNeto:N0</div>
+    </div></div></div>
+  </div>
+
+  <div class="card rounded-3">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Empleado</th>
+              <th>Bruto</th>
+              <th>Deducciones</th>
+              <th>Bonificaciones</th>
+              <th>Neto</th>
+            </tr>
+          </thead>
+          <tbody class="text-secondary">
+          @foreach (var p in Model)
+          {
+            <tr>
+              <td>@(p.Empleado?.Nombre ?? $"Empleado #{p.EmpleadoId}")</td>
+              <td>₡@p.SalarioBase:N0</td>
+              <td>₡@p.Deducciones:N0</td>
+              <td>₡@p.Bonificaciones:N0</td>
+              <td class="fw-semibold">₡@p.SalarioNeto:N0</td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

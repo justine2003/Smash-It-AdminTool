@@ -5,59 +5,90 @@ using SGA_Smash.Repositories;
 
 namespace SGA_Smash.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class ConceptoNominaController : Controller
     {
         private readonly IConceptoNominaRepository _repo;
-        public ConceptoNominaController(IConceptoNominaRepository repo) => _repo = repo;
+        private readonly IEmpleadoRepository _empleados;
 
-        // Lista conceptos activos por empleado
-        public async Task<IActionResult> Index(int empleadoId)
+        public ConceptoNominaController(IConceptoNominaRepository repo, IEmpleadoRepository empleados)
         {
-            var items = await _repo.GetActivosByEmpleadoAsync(empleadoId);
-            ViewBag.EmpleadoId = empleadoId;
-            return View(items);
+            _repo = repo;
+            _empleados = empleados;
         }
 
-        // Editar monto (solo activos)
-        public async Task<IActionResult> Edit(int id, int empleadoId)
+        [HttpGet]
+        public async Task<IActionResult> Manage(int empleadoId)
         {
-            var item = await _repo.GetByIdAsync(id);
-            if (item == null) return NotFound();
-            if (!item.Activo)
-            {
-                TempData["Error"] = "Solo se pueden modificar conceptos activos.";
-                return RedirectToAction(nameof(Index), new { empleadoId });
-            }
-
-            ViewBag.EmpleadoId = empleadoId;
-            return View(item);
+            var emp = await _empleados.GetByIdAsync(empleadoId);
+            if (emp == null) return NotFound();
+            ViewBag.Empleado = emp;
+            var items = await _repo.GetByEmpleadoAsync(empleadoId);
+            return View(items);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int empleadoId, ConceptoNomina model)
+        public async Task<IActionResult> Create(int empleadoId, string tipo, string nombre, decimal monto, bool activo = true)
         {
-            if (!ModelState.IsValid)
+            var usuario = User?.Identity?.Name ?? "system";
+            if (tipo != "Deduccion" && tipo != "Bonificacion")
             {
-                ViewBag.EmpleadoId = empleadoId;
-                return View(model);
+                TempData["Error"] = "Tipo inválido.";
+                return RedirectToAction(nameof(Manage), new { empleadoId });
             }
 
-            try
+            await _repo.CreateAsync(new ConceptoNomina
             {
-                var user = User?.Identity?.Name ?? "sistema";
-                await _repo.UpdateAsync(model, user);
-                TempData["Success"] = "Concepto actualizado correctamente.";
-            }
-            catch (System.Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-                ViewBag.EmpleadoId = empleadoId;
-                return View(model);
-            }
+                EmpleadoId = empleadoId,
+                Tipo = tipo,
+                Nombre = nombre,
+                Monto = monto,
+                Activo = activo
+            }, usuario);
 
-            return RedirectToAction(nameof(Index), new { empleadoId });
+            TempData["Success"] = "Concepto creado.";
+            return RedirectToAction(nameof(Manage), new { empleadoId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(int id, decimal monto, bool activo)
+        {
+            var usuario = User?.Identity?.Name ?? "system";
+            var c = await _repo.GetByIdAsync(id);
+            if (c == null) return NotFound();
+            var before = new ConceptoNomina { Id=c.Id, EmpleadoId=c.EmpleadoId, Tipo=c.Tipo, Nombre=c.Nombre, Monto=c.Monto, Activo=c.Activo };
+            c.Monto = monto;
+            c.Activo = activo;
+            await _repo.UpdateAsync(c, usuario, before);
+            TempData["Success"] = "Concepto actualizado.";
+            return RedirectToAction(nameof(Manage), new { empleadoId = c.EmpleadoId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Toggle(int id)
+        {
+            var usuario = User?.Identity?.Name ?? "system";
+            var c = await _repo.GetByIdAsync(id);
+            if (c == null) return NotFound();
+            await _repo.ToggleActivoAsync(id, usuario);
+            TempData["Success"] = "Estado actualizado.";
+            return RedirectToAction(nameof(Manage), new { empleadoId = c.EmpleadoId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var usuario = User?.Identity?.Name ?? "system";
+            var c = await _repo.GetByIdAsync(id);
+            if (c == null) return NotFound();
+            var empId = c.EmpleadoId;
+            await _repo.DeleteAsync(id, usuario);
+            TempData["Success"] = "Concepto eliminado.";
+            return RedirectToAction(nameof(Manage), new { empleadoId = empId });
         }
     }
 }

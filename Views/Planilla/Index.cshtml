@@ -1,90 +1,96 @@
 @model IEnumerable<SGA_Smash.Models.Planilla>
-@using System.Globalization
+@using System.Linq
 @{
     ViewData["Title"] = "Planillas";
-    var esCR = new CultureInfo("es-CR");
+    var hoy = DateTime.Today;
 }
-
 <div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Planillas</h3>
-            <a asp-action="Create" class="btn btn-primary">
-                <i class="ti ti-plus me-1"></i> Nueva Planilla
-            </a>
-        </div>
+
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Planilla de Pagos</h3>
+      <div class="d-flex gap-2">
+        <a asp-action="Reporte" asp-route-mes="@hoy.Month" asp-route-anio="@hoy.Year" class="btn btn-outline-primary">
+          <i class="ti ti-report me-1"></i> Reporte mensual
+        </a>
+        <a asp-action="Historial" class="btn btn-outline-secondary">
+          <i class="ti ti-history me-1"></i> Historial
+        </a>
+        <a asp-action="Create" class="btn btn-primary">
+          <i class="ti ti-plus me-1"></i> Nueva Planilla
+        </a>
+      </div>
     </div>
+  </div>
 
-    @{
-        var success = TempData["Success"] as string;
-    }
-    @if (!string.IsNullOrWhiteSpace(success))
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @success
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+  @{
+      var success = TempData["Success"] as string;
+      var error = TempData["Error"] as string;
+  }
+  @if (!string.IsNullOrWhiteSpace(success))
+  {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+          @success
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+  }
+  @if (!string.IsNullOrWhiteSpace(error))
+  {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          @error
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+  }
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="card rounded-3">
-            <div class="card-body text-center py-5">
-                <h5 class="mb-2">Aún no hay planillas registradas</h5>
-                <p class="text-muted mb-4">Crea tu primera planilla para comenzar.</p>
-                <a asp-action="Create" class="btn btn-outline-primary">
-                    <i class="ti ti-plus me-1"></i> Crear planilla
-                </a>
-            </div>
+  @if (Model == null || !Model.Any())
+  {
+      <div class="alert alert-info">No hay planillas registradas.</div>
+  }
+  else
+  {
+      <div class="card rounded-3">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Empleado</th>
+                  <th>Mes/Año</th>
+                  <th>Bruto</th>
+                  <th>Deducciones</th>
+                  <th>Bonificaciones</th>
+                  <th>Neto</th>
+                  <th class="text-center" style="width:260px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="text-secondary">
+              @foreach (var p in Model)
+              {
+                <tr>
+                  <td>@(p.Empleado?.Nombre ?? $"Empleado #{p.EmpleadoId}")</td>
+                  <td>@p.Mes/@p.Anio</td>
+                  <td>₡@p.SalarioBase:N0</td>
+                  <td>₡@p.Deducciones:N0</td>
+                  <td>₡@p.Bonificaciones:N0</td>
+                  <td class="fw-semibold">₡@p.SalarioNeto:N0</td>
+                  <td class="text-center text-nowrap">
+                    <a asp-controller="ConceptoNomina" asp-action="Manage" asp-route-empleadoId="@p.EmpleadoId"
+                       class="btn btn-info btn-sm me-2">
+                      <i class="ti ti-settings"></i> Modificar deducciones
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-warning btn-sm me-2">
+                      <i class="ti ti-pencil"></i> Editar
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-danger btn-sm">
+                      <i class="ti ti-trash"></i> Eliminar
+                    </a>
+                  </td>
+                </tr>
+              }
+              </tbody>
+            </table>
+          </div>
         </div>
-    }
-    else
-    {
-        <div class="card rounded-3">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Empleado</th>
-                                <th class="text-end">Salario Base</th>
-                                <th class="text-end">Deducciones</th>
-                                <th class="text-end">Bonificaciones</th>
-                                <th class="text-end">Total Pago</th>
-                                <th class="text-center">Periodo</th>
-                                <th class="text-center" style="width: 170px;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-secondary">
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@(item.Empleado?.Nombre ?? $"Empleado #{item.EmpleadoId}")</td>
-                                <td class="text-end">@($"₡{item.SalarioBase.ToString("N0", esCR)}")</td>
-                                <td class="text-end">@($"₡{item.Deducciones.ToString("N0", esCR)}")</td>
-                                <td class="text-end">@($"₡{item.Bonificaciones.ToString("N0", esCR)}")</td>
-                                <td class="text-end fw-semibold">@($"₡{item.TotalPago.ToString("N0", esCR)}")</td>
-                                <td class="text-center">@($"{item.Mes:D2}/{item.Anio}")</td>
-                                <td class="text-center text-nowrap">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm px-2 py-1 me-2 d-inline-flex align-items-center rounded-3">
-                                        <i class="ti ti-pencil"></i><span class="ms-1">Editar</span>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2 py-1 d-inline-flex align-items-center rounded-3">
-                                        <i class="ti ti-trash"></i><span class="ms-1">Eliminar</span>
-                                    </a>
-                                    <a asp-controller="ConceptoNomina"
-                                    asp-action="Index"
-                                    asp-route-empleadoId="@item.Empleado"
-                                    class="btn btn-outline-info btn-sm">
-                                    <i class="ti ti-adjustments"></i> Conceptos Activos
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    }
+      </div>
+  }
 </div>

@@ -1,129 +1,151 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Models;
 using SGA_Smash.Repositories;
+using SGA_Smash.Services;
 
 namespace SGA_Smash.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class PlanillaController : Controller
     {
-        private readonly IPlanillaRepository _planillaRepository;
-        private readonly IEmpleadoRepository _empleadoRepository;
-        private readonly IPlanillaCalculoService _calculoService;
+        private readonly IPlanillaRepository _planillas;
+        private readonly IEmpleadoRepository _empleados;
+        private readonly PlanillaCalculoService _calculo;
+        private readonly ReportService _reportes;
 
-        public PlanillaController(IPlanillaRepository planillaRepository,
-                                IEmpleadoRepository empleadoRepository,
-                                IPlanillaCalculoService calculoService)
+        public PlanillaController(
+            IPlanillaRepository planillas,
+            IEmpleadoRepository empleados,
+            PlanillaCalculoService calculo,
+            ReportService reportes)
         {
-            _planillaRepository = planillaRepository;
-            _empleadoRepository = empleadoRepository;
-            _calculoService = calculoService;
-        }
-
-        
-
-        private async Task LoadEmpleadosAsync(int? selectedId = null)
-        {
-            var empleados = await _empleadoRepository.GetAllEmpleadosAsync();
-            ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre", selectedId);
+            _planillas = planillas;
+            _empleados = empleados;
+            _calculo = calculo;
+            _reportes = reportes;
         }
 
         public async Task<IActionResult> Index()
         {
-            var planillas = await _planillaRepository.GetAllAsync();
-            return View(planillas);
-        }
-
-        public async Task<IActionResult> Details(int id)
-        {
-            var planilla = await _planillaRepository.GetByIdAsync(id);
-            if (planilla == null) return NotFound();
-            return View(planilla);
+            var items = await _planillas.GetAllAsync();
+            return View(items);
         }
 
         public async Task<IActionResult> Create()
         {
-            await LoadEmpleadosAsync();
-            return View();
+            var empleados = await _empleados.GetAllAsync();
+            ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre");
+            var today = DateTime.Today;
+            return View(new Planilla { Mes = today.Month, Anio = today.Year });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Planilla planilla)
+        public async Task<IActionResult> Create(Planilla model, bool autocalcular = true)
         {
-            if (!ModelState.IsValid)
+            if (autocalcular)
             {
-                await LoadEmpleadosAsync(planilla.EmpleadoId);
-                return View(planilla);
+                var (ded, bon) = await _calculo.CalcularActivosAsync(model.EmpleadoId);
+                if (model.Deducciones <= 0) model.Deducciones = ded;
+                if (model.Bonificaciones <= 0) model.Bonificaciones = bon;
             }
 
-            var (ded, bon) = await _calculoService.CalcularConceptosActivosAsync(planilla.EmpleadoId);
-            planilla.Deducciones = ded;
-            planilla.Bonificaciones = bon;
+            if (await _planillas.ExistsPeriodoAsync(model.EmpleadoId, model.Mes, model.Anio))
+                ModelState.AddModelError(string.Empty, "Ya existe una planilla para este empleado en el período indicado.");
 
-            // Salario neto se calcula por tu modelo (TotalPago/prop calculada)
-            await _planillaRepository.AddAsync(planilla);
-            TempData["Success"] = "Planilla registrada con éxito.";
+            if (!ModelState.IsValid)
+            {
+                var empleados = await _empleados.GetAllAsync();
+                ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre", model.EmpleadoId);
+                return View(model);
+            }
+
+            await _planillas.AddAsync(model);
+            TempData["Success"] = "Planilla registrada correctamente.";
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            var planilla = await _planilla_repository_Get(id);
-            if (planilla == null) return NotFound();
-
-            await LoadEmpleadosAsync(planilla.EmpleadoId);
-            return View(planilla);
-        }
-
-        private async Task<Planilla?> _planilla_repository_Get(int id)
-        {
-            return await _planillaRepository.GetByIdAsync(id);
+            var p = await _planillas.GetByIdAsync(id);
+            if (p == null) return NotFound();
+            var empleados = await _empleados.GetAllAsync();
+            ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre", p.EmpleadoId);
+            return View(p);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Planilla planilla)
+        public async Task<IActionResult> Edit(int id, Planilla model)
         {
-            if (id != planilla.Id) return NotFound();
+            if (id != model.Id) return NotFound();
 
             if (!ModelState.IsValid)
             {
-                await LoadEmpleadosAsync(planilla.EmpleadoId);
-                return View(planilla);
+                var empleados = await _empleados.GetAllAsync();
+                ViewBag.Empleados = new SelectList(empleados, "Id", "Nombre", model.EmpleadoId);
+                return View(model);
             }
 
-            try
-            {
-                await _planillaRepository.UpdateAsync(planilla);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _planillaRepository.ExistsAsync(planilla.Id))
-                    return NotFound();
-                else
-                    throw;
-            }
-
-            TempData["Success"] = "Planilla actualizada con éxito.";
+            await _planillas.UpdateAsync(model);
+            TempData["Success"] = "Planilla actualizada correctamente.";
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            var planilla = await _planillaRepository.GetByIdAsync(id);
-            if (planilla == null) return NotFound();
-            return View(planilla);
+            var p = await _planillas.GetByIdAsync(id);
+            if (p == null) return NotFound();
+            return View(p);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _planillaRepository.DeleteAsync(id);
-            TempData["Success"] = "Planilla eliminada con éxito.";
+            await _planillas.DeleteAsync(id);
+            TempData["Success"] = "Planilla eliminada correctamente.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // Historial (filtrable)
+        public async Task<IActionResult> Historial(int? mes, int? anio)
+        {
+            var items = await _planillas.GetAllAsync();
+            if (mes.HasValue) items = items.Where(p => p.Mes == mes.Value);
+            if (anio.HasValue) items = items.Where(p => p.Anio == anio.Value);
+            return View(items.OrderByDescending(p => p.Anio).ThenByDescending(p => p.Mes));
+        }
+
+        // Reporte mensual + totales
+        public async Task<IActionResult> Reporte(int mes, int anio)
+        {
+            var (items, bruto, ded, bon, neto) = await _reportes.GetMensualAsync(mes, anio);
+            ViewBag.Mes = mes;
+            ViewBag.Anio = anio;
+            ViewBag.TotalBruto = bruto;
+            ViewBag.TotalDeducciones = ded;
+            ViewBag.TotalBonificaciones = bon;
+            ViewBag.TotalNeto = neto;
+            return View(items);
+        }
+
+        // Export Excel (CSV sencillo compatible)
+        public async Task<FileResult> ExportExcel(int mes, int anio)
+        {
+            var (items, _, _, _, _) = await _reportes.GetMensualAsync(mes, anio);
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Empleado,Mes,Anio,SalarioBase,Deducciones,Bonificaciones,SalarioNeto");
+            foreach (var p in items)
+            {
+                var nombre = p.Empleado?.Nombre ?? $"Empleado #{p.EmpleadoId}";
+                csv.AppendLine($"{nombre},{p.Mes},{p.Anio},{p.SalarioBase},{p.Deducciones},{p.Bonificaciones},{p.SalarioNeto}");
+            }
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            var fname = $"reporte_planilla_{anio}_{mes:00}.csv";
+            return File(bytes, "text/csv", fname);
         }
     }
 }
