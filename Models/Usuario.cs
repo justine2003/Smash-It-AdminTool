@@ -3,12 +3,11 @@
     public class Usuario
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
-        public string Correo { get; set; }
-        public string Contrasena { get; set; }
-        public DateTime FechaCreacion { get; set; }
-        public DateTime? UltimoAcceso { get; set; }
-        public int RolId { get; set; }
-        public Rol? Rol { get; set; }
+        public string nombre { get; set; }
+        public string? correo { get; set; }
+        public string contrasena { get; set; }
+        public DateTime? fecha_creacion { get; set; }
+        public DateTime? ultimo_acceso { get; set; }
+        public int? rol_id { get; set; }
     }
 }

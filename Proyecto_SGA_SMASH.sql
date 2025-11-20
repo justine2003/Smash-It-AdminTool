@@ -89,7 +89,7 @@ CREATE TABLE Gasto (
     tipo VARCHAR(50),
     descripcion TEXT,
     registrado_por INT,
-    FOREIGN KEY (registrado_por) REFERENCES Usuario(id)
+    FOREIGN KEY (registrado_por) REFERENCES Empleado(id)
 );
 
 -- Tabla Proveedor
@@ -161,3 +161,15 @@ CREATE TABLE ContratoProveedor (
     FOREIGN KEY (proveedor_id) REFERENCES Proveedor(id)
 );
 
+CREATE TABLE Mesas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    numero NVARCHAR(10) NOT NULL,
+    capacidad INT NOT NULL CHECK (capacidad BETWEEN 1 AND 20),
+    estado NVARCHAR(20) DEFAULT 'Disponible' -- Disponible / Reservada / Ocupada
+);
+
+INSERT INTO Mesas (numero, capacidad, estado) VALUES
+('M1', 2, 'Disponible'),
+('M2', 4, 'Disponible'),
+('M3', 6, 'Disponible'),
+('M4', 8, 'Disponible');

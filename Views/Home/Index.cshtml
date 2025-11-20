@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Dashboard";
     var empleadosPorRol = (Dictionary<string, int>)ViewBag.EmpleadosPorRol;
-    var gastosMensuales = (Dictionary<string, decimal>)ViewBag.GastosMensuales;
+    var GastoMensuales = (Dictionary<string, decimal>)ViewBag.GastoMensuales;
 }
 
 <div class="container-fluid">
@@ -18,8 +18,8 @@
         <div class="col-lg-6 mb-4">
             <div class="card rounded-3">
                 <div class="card-body">
-                    <h4 class="card-title">Gastos mensuales</h4>
-                    <canvas id="gastosChart" height="200"></canvas>
+                    <h4 class="card-title">Gasto mensuales</h4>
+                    <canvas id="GastoChart" height="200"></canvas>
                 </div>
             </div>
         </div>
@@ -53,13 +53,13 @@
             }
         });
 
-        const gastosChart = new Chart(document.getElementById('gastosChart'), {
+        const GastoChart = new Chart(document.getElementById('GastoChart'), {
             type: 'bar',
             data: {
-                labels: @Html.Raw(Json.Serialize(gastosMensuales.Keys)),
+                labels: @Html.Raw(Json.Serialize(GastoMensuales.Keys)),
                 datasets: [{
-                    label: 'Gastos en colones',
-                    data: @Html.Raw(Json.Serialize(gastosMensuales.Values)),
+                    label: 'Gasto en colones',
+                    data: @Html.Raw(Json.Serialize(GastoMensuales.Values)),
                     backgroundColor: '#FF2E2E',
                     borderColor: '#2A2A2A',
                     borderWidth: 1

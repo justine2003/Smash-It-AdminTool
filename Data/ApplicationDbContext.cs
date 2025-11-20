@@ -21,7 +21,7 @@ namespace SGA_Smash.Data
         public DbSet<Planilla> Planillas { get; set; }
         public DbSet<Vacacion> Vacaciones { get; set; }
         public DbSet<ContratoProveedor> ContratoProveedores { get; set; }
-        public DbSet<Gasto> Gastos { get; set; }
+        public DbSet<Gasto> Gasto { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -126,11 +126,14 @@ namespace SGA_Smash.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-     
 
+            modelBuilder.Entity<Gasto>(entity =>
+            {
+                entity.ToTable("Gasto");
 
-
+                entity.HasOne(g => g.RegistroEmpleado).WithMany().HasForeignKey(g => g.registrado_por);
+            });
         }
 
     }
-    }
+}

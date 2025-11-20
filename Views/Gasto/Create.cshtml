@@ -12,23 +12,23 @@
                     <h4 class="card-title">Registrar Nuevo Gasto</h4>
                     <form asp-action="Create">
                         <div class="mb-3">
-                            <label asp-for="Tipo" class="form-label"></label>
-                            <input asp-for="Tipo" class="form-control" />
+                            <label asp-for="tipo" class="form-label"></label>
+                            <input asp-for="tipo" class="form-control" />
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Monto" class="form-label"></label>
-                            <input asp-for="Monto" class="form-control" />
+                            <label asp-for="monto" class="form-label"></label>
+                            <input asp-for="monto" class="form-control" />
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Descripcion" class="form-label"></label>
-                            <textarea asp-for="Descripcion" class="form-control"></textarea>
+                            <label asp-for="descripcion" class="form-label"></label>
+                            <textarea asp-for="descripcion" class="form-control"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="RegistradoPor" class="form-label">Registrado Por</label>
-                            <select asp-for="RegistradoPor" class="form-select" asp-items="ViewBag.Empleados">
+                            <label asp-for="registrado_por" class="form-label">Registrado Por</label>
+                            <select asp-for="registrado_por" class="form-select" asp-items="ViewBag.Empleados">
                                 <option value="">Seleccione un empleado</option>
                             </select>
                         </div>
