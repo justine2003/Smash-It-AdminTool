@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<SGA_Smash.Models.Gasto>
 
 @{
-    ViewData["Title"] = "Reporte de Gastos";
+    ViewData["Title"] = "Reporte de Gasto";
     string desdeVal = ViewBag.Desde ?? "";
     string hastaVal = ViewBag.Hasta ?? "";
     string tipoVal = ViewBag.Tipo ?? "";
@@ -12,7 +12,7 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Reporte de Gastos</h3>
+            <h3 class="mb-0">Reporte de Gasto</h3>
             <small class="text-muted">Generado en @elapsed ms</small>
         </div>
     </div>
@@ -71,7 +71,7 @@
         <div class="card-body">
             @if (Model == null || !Model.Any())
             {
-                <div class="text-center text-muted py-5">No hay gastos para el filtro seleccionado.</div>
+                <div class="text-center text-muted py-5">No hay Gasto para el filtro seleccionado.</div>
             }
             else
             {
@@ -92,13 +92,13 @@
                             }
                             @foreach (var g in Model)
                             {
-                                total += g.Monto;
+                                total += g.monto;
                                 <tr>
-                                    <td>@g.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@g.Tipo</td>
-                                    <td class="text-end">@g.Monto.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
-                                    <td>@g.Descripcion</td>
-                                    <td>@g.RegistradoPor</td>
+                                    <td>@g.fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@g.tipo</td>
+                                    <td class="text-end">@g.monto.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))</td>
+                                    <td>@g.descripcion</td>
+                                    <td>@g.registrado_por</td>
                                 </tr>
                             }
                         </tbody>

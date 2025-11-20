@@ -26,19 +26,27 @@ namespace SGA_Smash.Controllers
         {
             if (ModelState.IsValid)
             {
-                var usuario = _context.Usuarios.FirstOrDefault(p => p.Nombre == model.Usuario);
+                var usuario = _context.Usuarios.FirstOrDefault(p => p.nombre == model.nombre);
 
                 if (usuario != null) 
                 {
-                    bool contrasena = BCrypt.Net.BCrypt.Verify(model.Contrasena, usuario.Contrasena);
-
-                    if (contrasena)
+                    try
                     {
-                        TempData["Usuario"] = model.Usuario;
-                        TempData["rol"] = model.Rol;
-                        return RedirectToAction("Index", "Home");
+                        bool contrasena = BCrypt.Net.BCrypt.Verify(model.contrasena, usuario.contrasena);
+
+                        if (contrasena)
+                        {
+                            TempData["Usuario"] = model.nombre;
+                            TempData["rol"] = model.rol_id;
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
+                    catch (System.Exception)
+                    {
                     }
                 }
+                ViewBag .Mensaje = "Usuario o contraseña no válido";
+                return View(model);
             }
 
             ViewBag.Mensaje = "Usuario o contraseña no válido";

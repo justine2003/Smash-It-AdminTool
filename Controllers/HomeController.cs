@@ -23,7 +23,7 @@ public class HomeController : Controller
         { "Gerentes", 1 }
     };
 
-        ViewBag.GastosMensuales = new Dictionary<string, decimal>
+        ViewBag.GastoMensuales = new Dictionary<string, decimal>
     {
         { "Enero", 120000 },
         { "Febrero", 95000 },

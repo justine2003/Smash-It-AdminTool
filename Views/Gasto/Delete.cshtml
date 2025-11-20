@@ -12,23 +12,23 @@
                     <h4 class="card-title text-danger">¿Estás seguro que deseas eliminar este gasto?</h4>
 
                     <div class="mb-3">
-                        <strong>Tipo:</strong> @Model.Tipo
+                        <strong>Tipo:</strong> @Model.tipo
                     </div>
                     <div class="mb-3">
-                        <strong>Monto:</strong> ₡@Model.Monto.ToString("N0")
+                        <strong>Monto:</strong> ₡@Model.monto.ToString("N0")
                     </div>
                     <div class="mb-3">
-                        <strong>Descripción:</strong> @Model.Descripcion
+                        <strong>Descripción:</strong> @Model.descripcion
                     </div>
                     <div class="mb-3">
-                        <strong>Fecha:</strong> @Model.Fecha.ToString("dd/MM/yyyy")
+                        <strong>Fecha:</strong> @Model.fecha.ToString("dd/MM/yyyy")
                     </div>
                     <div class="mb-3">
-                        <strong>Registrado Por:</strong> @Model.RegistradoPor
+                        <strong>Registrado Por:</strong> @Model.RegistroEmpleado.Nombre
                     </div>
 
-                    <form asp-action="DeleteConfirmed">
-                        <input type="hidden" asp-for="Id" />
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="id" />
                         <button type="submit" class="btn btn-danger">
                             <i class="ti ti-trash me-1"></i> Eliminar
                         </button>

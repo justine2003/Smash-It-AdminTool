@@ -1,7 +1,7 @@
 @model IEnumerable<SGA_Smash.Models.Gasto>
 
 @{
-    ViewData["Title"] = "Gastos";
+    ViewData["Title"] = "Gasto";
 }
 
 <div class="container-fluid">
@@ -11,10 +11,21 @@
                 <div class="card-body">
                     <div class="d-md-flex align-items-center justify-content-between">
                         <div>
-                            <h4 class="card-title">Gastos Registrados</h4>
-                            <p class="card-subtitle">Lista de gastos demostrativos</p>
+                            <h4 class="card-title">Gasto Registrados</h4>
+                            <p class="card-subtitle">Lista de Gasto demostrativos</p>
                         </div>
                         <div>
+                            <div class="dropdown">
+                                <button class="btn btn-info dropdown-toggle" type="button" id="reporteDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="ti ti-download me-1"></i> Generar Reporte
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="reporteDropdown">
+                                    <li><a class="dropdown-item" asp-action="ExportarExecel">Exportar a Excel</a></li>
+                                    <li><a class="dropdown-item" asp-action="ExportPDF">Exportar a PDF</a></li>
+                                </ul>
+                            </div>
+                            <br />
+
                             <a asp-action="Create" class="btn btn-primary">
                                 <i class="ti ti-plus me-1"></i> Nuevo Gasto
                             </a>
@@ -37,16 +48,16 @@
                                 @foreach (var gasto in Model)
                                 {
                                     <tr>
-                                        <td class="px-0">@gasto.Tipo</td>
-                                        <td class="px-0">₡@gasto.Monto.ToString("N0")</td>
-                                        <td class="px-0">@gasto.Descripcion</td>
-                                        <td class="px-0">@gasto.Fecha.ToString("dd/MM/yyyy")</td>
-                                        <td class="px-0">@gasto.RegistradoPor</td>
+                                        <td class="px-0">@gasto.tipo</td>
+                                        <td class="px-0">₡@gasto.monto.ToString("N0")</td>
+                                        <td class="px-0">@gasto.descripcion</td>
+                                        <td class="px-0">@gasto.fecha.ToString("dd/MM/yyyy")</td>
+                                        <td class="px-0">@gasto.RegistroEmpleado.Nombre</td>
                                         <td class="px-0 text-end">
-                                            <a asp-action="Edit" asp-route-id="@gasto.Id" class="btn btn-sm btn-warning me-1">
+                                            <a asp-action="Edit" asp-route-id="@gasto.id" class="btn btn-sm btn-warning me-1">
                                                 <i class="ti ti-pencil"></i>
                                             </a>
-                                            <a asp-action="Delete" asp-route-id="@gasto.Id" class="btn btn-sm btn-danger">
+                                            <a asp-action="Delete" asp-route-id="@gasto.id" class="btn btn-sm btn-danger">
                                                 <i class="ti ti-trash"></i>
                                             </a>
                                         </td>
