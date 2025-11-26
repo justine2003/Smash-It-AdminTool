@@ -1,20 +1,19 @@
-@model SGA_Smash.Models.LoginViewModel
+@model SGA_Smash.Models.Usuario
 
 @{
-    Layout = null;
+    Layout = null; // o usa tu _Layout si quieres el menú
 }
 
 <!doctype html>
 <html lang="es">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Iniciar Sesión - SGA Smash</title>
+    <title>Registrar Usuario - SGA Smash</title>
 
     <link rel="shortcut icon" href="~/assets/images/logos/smashlogo.svg" />
-
     <link rel="stylesheet" href="~/assets/css/styles.min.css" />
+
     <style>
         body {
             position: relative;
@@ -50,7 +49,6 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* Botón rojo Smash */
         .btn-smash-red {
             background-color: #FF2E2E;
             color: white;
@@ -62,7 +60,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="page-wrapper" id="main-wrapper">
         <div class="position-relative min-vh-100 d-flex align-items-center justify-content-center">
@@ -73,36 +70,42 @@
                             <a href="~/Home/Index" class="text-nowrap logo-img text-center d-block py-3 w-100">
                                 <img src="~/assets/images/logos/smashlogo.svg" width="150" alt="logo" />
                             </a>
-                            <p class="text-center text-white">Inicie sesión en el sistema</p>
+                            <p class="text-center text-white">Registrar nuevo usuario</p>
 
-                            <form asp-action="Login" asp-controller="Account" method="post">
+                            <form asp-action="Register" asp-controller="Account" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                                 <div class="mb-3">
-                                    <label class="form-label text-white">Usuario</label>
+                                    <label asp-for="nombre" class="form-label text-white"></label>
                                     <input asp-for="nombre" class="form-control" />
+                                    <span asp-validation-for="nombre" class="text-danger"></span>
                                 </div>
-                                <div class="mb-4">
-                                    <label class="form-label text-white">Contraseña</label>
+
+                                <div class="mb-3">
+                                    <label asp-for="correo" class="form-label text-white"></label>
+                                    <input asp-for="correo" class="form-control" />
+                                    <span asp-validation-for="correo" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="contrasena" class="form-label text-white"></label>
                                     <input asp-for="contrasena" type="password" class="form-control" />
+                                    <span asp-validation-for="contrasena" class="text-danger"></span>
                                 </div>
+
+                                @* Si quieres setear el rol fijo, puedes usar un hidden:
+                                   <input type="hidden" asp-for="rol_id" value="2" />
+                                *@
+
                                 <button type="submit"
-                                    class="btn btn-smash-red w-100 py-8 fs-4 mb-4 rounded-2">Ingresar</button>
+                                        class="btn btn-smash-red w-100 py-8 fs-4 mb-2 rounded-2">
+                                    Guardar usuario
+                                </button>
 
-                                <a asp-controller="Account"
-                                asp-action="Register"
-                                class="btn btn-outline-light w-100 mb-4 rounded-2">
-                                    Registrar nuevo usuario
+                                <a asp-action="Login" asp-controller="Account"
+                                   class="btn btn-outline-light w-100 rounded-2">
+                                    Volver al inicio de sesión
                                 </a>
-
-                                @if (TempData["Mensaje"] != null)
-                                {
-                                    <div class="alert alert-success text-center">@TempData["Mensaje"]</div>
-                                }
-
-                                @if (ViewBag.Mensaje != null)
-                                {
-                                    <div class="alert alert-danger text-center">@ViewBag.Mensaje</div>
-                                }
-
                             </form>
                         </div>
                     </div>
@@ -111,9 +114,8 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="~/assets/libs/jquery/jquery.min.js"></script>
     <script src="~/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
 </body>
-
 </html>

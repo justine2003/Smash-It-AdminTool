@@ -3,7 +3,10 @@ using SGA_Smash.Data;
 using SGA_Smash.Repositories;
 using SGA_Smash.Services;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSession();
 
 //Registra el contexto de base de datos en el contenedor de dependencias
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -26,6 +29,7 @@ builder.Services.AddScoped<IContratoProveedorRepository, ContratoProveedorReposi
 builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
 builder.Services.AddScoped<INotificationService, EmailNotificationService>();
 builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -43,6 +47,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthorization();
 

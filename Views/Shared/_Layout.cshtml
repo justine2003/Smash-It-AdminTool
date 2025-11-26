@@ -1,6 +1,23 @@
 ﻿<!doctype html>
 <html lang="en">
 
+@using Microsoft.AspNetCore.Http
+
+@{
+    var userName = Context.Session.GetString("Usuario");
+    var rolId = Context.Session.GetInt32("Rol") ?? 0;
+
+    string rolNombre = "Invitado";
+    if (rolId == 1)
+    {
+        rolNombre = "Administrador";
+    }
+    else if (rolId == 2)
+    {
+        rolNombre = "Usuario";
+    }
+}
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -24,7 +41,7 @@
             <div
                 class="app-topstrip bg-warning py-2 px-3 w-100 d-lg-flex align-items-center justify-content-between m-0">
                 <div class="d-lg-flex align-items-center gap-2">
-                    <h3 class="text-white mb-2 mb-lg-0 fs-5 text-center">Sistema SGA-Smash</h3>
+                    <h3 class="text-white mb-2 mb-lg-0 fs-5 text-center">Sistema SGA-Smash Bienvenido: <strong>@userName</strong><br /></h3>
                 </div>
             </div>
 
@@ -47,30 +64,55 @@
                                     class="nav-small-cap-icon fs-4"></iconify-icon>
                                 <span class="hide-menu">Menú</span>
                             </li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Empleado"
-                                    asp-action="Index"><i class="ti ti-atom"></i><span
-                                        class="hide-menu">Empleados</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Cliente"
-                                    asp-action="Index"><i class="ti ti-users"></i><span
-                                        class="hide-menu">Clientes</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Reservacion"
-                                    asp-action="Index"><i class="ti ti-calendar-event"></i><span
-                                        class="hide-menu">Reservaciones</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Producto"
-                                    asp-action="Index"><i class="ti ti-package"></i><span
-                                        class="hide-menu">Productos</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Proveedor"
-                                    asp-action="Index"><i class="ti ti-truck-delivery"></i><span
-                                        class="hide-menu">Proveedores</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Gasto"
-                                    asp-action="Index"><i class="ti ti-coin"></i><span
-                                        class="hide-menu">Gasto</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Planilla"
-                                    asp-action="Index"><i class="ti ti-clipboard-list"></i><span
-                                        class="hide-menu">Planilla</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link" asp-controller="Vacacion"
-                                    asp-action="Index"><i class="ti ti-beach"></i><span
-                                        class="hide-menu">Vacaciones</span></a></li>
+                            @* Ejemplo: solo admin puede ver Empleados, Planilla, Gasto *@
+                            @if (rolId == 1) // 1 = Admin
+                            {
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Empleado" asp-action="Index">
+                                        <i class="ti ti-atom"></i><span class="hide-menu">Empleados</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Planilla" asp-action="Index">
+                                        <i class="ti ti-clipboard-list"></i><span class="hide-menu">Planilla</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Gasto" asp-action="Index">
+                                        <i class="ti ti-coin"></i><span class="hide-menu">Gasto</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @* Opciones visibles para todos los usuarios logueados *@
+                            @if (rolId > 0)
+                            {
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Cliente" asp-action="Index">
+                                        <i class="ti ti-users"></i><span class="hide-menu">Clientes</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Reservacion" asp-action="Index">
+                                        <i class="ti ti-calendar-event"></i><span class="hide-menu">Reservaciones</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Producto" asp-action="Index">
+                                        <i class="ti ti-package"></i><span class="hide-menu">Productos</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Proveedor" asp-action="Index">
+                                        <i class="ti ti-truck-delivery"></i><span class="hide-menu">Proveedores</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="Vacacion" asp-action="Index">
+                                        <i class="ti ti-beach"></i><span class="hide-menu">Vacaciones</span>
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </nav>
                 </div>
@@ -96,10 +138,15 @@
 
                                 <div class="dropdown">
                                     <a class="btn btn-light border-0 dropdown-toggle p-0" href="#" role="button"
-                                        id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                    id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="ti ti-user fs-5"></i>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+                                        <li class="dropdown-item-text">
+                                            <strong>@userName</strong><br />
+                                            <span class="text-muted small">@rolNombre</span>
+                                        </li>
+                                        <li><hr class="dropdown-divider" /></li>
                                         <li>
                                             <a class="dropdown-item" href="~/Account/Logout">
                                                 <i class="ti ti-logout me-2"></i> Cerrar sesión
