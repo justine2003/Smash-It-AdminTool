@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,38 +11,51 @@ namespace SGA_Smash.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "El empleado es obligatorio.")]
+        [Required]
         [Column("empleado_id")]
         public int EmpleadoId { get; set; }
 
         [Required]
-        [Range(1, 12, ErrorMessage = "El mes debe estar entre 1 y 12.")]
         [Column("mes")]
-        public int Mes { get; set; }
+        public int Mes { get; set; }   // 1-12
 
         [Required]
-        [Range(2000, 2100, ErrorMessage = "El año debe estar entre 2000 y 2100.")]
         [Column("anio")]
         public int Anio { get; set; }
 
         [Required]
-        [Range(0, double.MaxValue, ErrorMessage = "El salario base debe ser un número válido y no negativo.")]
         [Column("salario_base", TypeName = "decimal(10,2)")]
+        [Display(Name = "Salario base")]
         public decimal SalarioBase { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Las bonificaciones deben ser un número válido y no negativo.")]
+        [Required]
         [Column("bonificaciones", TypeName = "decimal(10,2)")]
+        [Display(Name = "Bonificaciones")]
         public decimal Bonificaciones { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Las deducciones deben ser un número válido y no negativo.")]
+        [Required]
         [Column("deducciones", TypeName = "decimal(10,2)")]
+        [Display(Name = "Deducciones")]
         public decimal Deducciones { get; set; }
 
-        [NotMapped]
-        [DataType(DataType.Currency)]
-        public decimal TotalPago => SalarioBase - Deducciones + Bonificaciones;
+        [Required]
+        [Column("salario_neto", TypeName = "decimal(10,2)")]
+        [Display(Name = "Salario neto")]
+        public decimal SalarioNeto { get; set; }
 
-        [ForeignKey(nameof(EmpleadoId))]
-        public Empleado? Empleado { get; set; }
+        [Required]
+        [Column("fecha_registro")]
+        public DateTime FechaRegistro { get; set; }
+
+        [ForeignKey("EmpleadoId")]
+        public Empleado Empleado { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Salario bruto")]
+        public decimal SalarioBruto => SalarioBase + Bonificaciones;
+
+        // Para compatibilidad con tu Index actual
+        [NotMapped]
+        public decimal TotalPago => SalarioNeto;
     }
 }

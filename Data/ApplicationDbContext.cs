@@ -23,6 +23,7 @@ namespace SGA_Smash.Data
         public DbSet<ContratoProveedor> ContratoProveedores { get; set; }
         public DbSet<Gasto> Gasto { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+         public DbSet<HistorialCambiosPlanilla> HistorialCambiosPlanillas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,25 +69,26 @@ namespace SGA_Smash.Data
 
 
             // Configuración para Planilla
-            modelBuilder.Entity<Planilla>(entity =>
-            {
-                entity.ToTable("Planilla");
-                entity.HasKey(p => p.Id);
+            modelBuilder.Entity<Planilla>()
+                .HasIndex(p => new { p.EmpleadoId, p.Mes, p.Anio })
+                .IsUnique();
 
-                entity.Property(p => p.Id).HasColumnName("id");
-                entity.Property(p => p.EmpleadoId).HasColumnName("empleado_id");
-                entity.Property(p => p.Mes).HasColumnName("mes");
-                entity.Property(p => p.Anio).HasColumnName("anio");
-                entity.Property(p => p.SalarioBase).HasColumnName("salario_base").HasColumnType("decimal(10,2)");
-                entity.Property(p => p.Bonificaciones).HasColumnName("bonificaciones").HasColumnType("decimal(10,2)");
-                entity.Property(p => p.Deducciones).HasColumnName("deducciones").HasColumnType("decimal(10,2)");
+            // Relación Empleado - Planilla
+            modelBuilder.Entity<Planilla>()
+                .HasOne(p => p.Empleado)
+                .WithMany()
+                .HasForeignKey(p => p.EmpleadoId);
 
-                
-                entity.HasOne(p => p.Empleado)
-                      .WithMany()
-                      .HasForeignKey(p => p.EmpleadoId)
-                      .HasConstraintName("FK_Planilla_Empleado");
-            });
+            // Relación HistorialCambiosPlanilla -> Empleado / Usuario
+            modelBuilder.Entity<HistorialCambiosPlanilla>()
+                .HasOne(h => h.Empleado)
+                .WithMany()
+                .HasForeignKey(h => h.EmpleadoId);
+
+            modelBuilder.Entity<HistorialCambiosPlanilla>()
+                .HasOne(h => h.Usuario)
+                .WithMany()
+                .HasForeignKey(h => h.UsuarioId);
 
             modelBuilder.Entity<Vacacion>(entity =>
             {

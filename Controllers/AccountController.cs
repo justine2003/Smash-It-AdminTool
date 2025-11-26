@@ -47,6 +47,7 @@ namespace SGA_Smash.Controllers
                     {
                         HttpContext.Session.SetString("Usuario", usuario.nombre);
                         HttpContext.Session.SetInt32("Rol", usuario.rol_id ?? 0);
+                        HttpContext.Session.SetInt32("UsuarioId", usuario.Id); 
 
                         // (TempData lo puedes seguir usando para mensajes si querés)
                         TempData["Usuario"] = usuario.nombre;

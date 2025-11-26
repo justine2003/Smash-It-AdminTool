@@ -1,37 +1,116 @@
-@model IEnumerable<SGA_Smash.Models.Planilla>
+@model SGA_Smash.Models.ViewModels.PlanillaReporteViewModel
 @using System.Globalization
+
 @{
     ViewData["Title"] = "Planillas";
     var esCR = new CultureInfo("es-CR");
+    var currentYear = DateTime.Now.Year;
 }
 
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Planillas</h3>
-            <a asp-action="Create" class="btn btn-primary">
-                <i class="ti ti-plus me-1"></i> Nueva Planilla
-            </a>
+            <div>
+                <h3 class="mb-0">Planillas</h3>
+                <small class="text-muted">
+                    Reporte de pagos mensuales e historial de planillas.
+                </small>
+            </div>
+            <div>
+                <!-- CREATE -->
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i> Nueva Planilla
+                </a>
+            </div>
         </div>
     </div>
 
-    @{
-        var success = TempData["Success"] as string;
-    }
-    @if (!string.IsNullOrWhiteSpace(success))
+    @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @success
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
     }
 
-    @if (Model == null || !Model.Any())
+    <!-- FILTROS: MES/AÑO COMO DROPDOWN -->
+    <form method="get" class="row g-2 mb-3 align-items-end">
+        <!-- Mes -->
+        <div class="col-12 col-md-3">
+            <label class="form-label mb-0">Mes</label>
+            <select name="mes" class="form-select">
+                <option value="">Todos</option>
+                @for (int m = 1; m <= 12; m++)
+                {
+                    var nombreMes = esCR.DateTimeFormat.GetMonthName(m);
+                    nombreMes = esCR.TextInfo.ToTitleCase(nombreMes);
+
+                    if (Model?.Mes.HasValue == true && Model.Mes.Value == m)
+                    {
+                        <option value="@m" selected="selected">@nombreMes</option>
+                    }
+                    else
+                    {
+                        <option value="@m">@nombreMes</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <!-- Año -->
+        <div class="col-12 col-md-3">
+            <label class="form-label mb-0">Año</label>
+            <select name="anio" class="form-select">
+                <option value="">Todos</option>
+                @for (int y = currentYear; y >= currentYear - 5; y--)
+                {
+                    if (Model?.Anio.HasValue == true && Model.Anio.Value == y)
+                    {
+                        <option value="@y" selected="selected">@y</option>
+                    }
+                    else
+                    {
+                        <option value="@y">@y</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <!-- Botones filtros -->
+        <div class="col-12 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary mt-3 mt-md-0">
+                <i class="ti ti-filter"></i> Filtrar
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary mt-3 mt-md-0">
+                Limpiar filtros
+            </a>
+        </div>
+
+        <!-- Exportar (stubs) -->
+        <div class="col-12 col-md-3 d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
+            <a asp-action="ExportarPdf"
+               asp-route-mes="@Model?.Mes"
+               asp-route-anio="@Model?.Anio"
+               class="btn btn-outline-danger">
+                <i class="ti ti-file-type-pdf"></i> Exportar PDF
+            </a>
+            <a asp-action="ExportarExcel"
+               asp-route-mes="@Model?.Mes"
+               asp-route-anio="@Model?.Anio"
+               class="btn btn-outline-success">
+                <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+            </a>
+        </div>
+    </form>
+
+    @if (Model?.Planillas == null || !Model.Planillas.Any())
     {
         <div class="card rounded-3">
             <div class="card-body text-center py-5">
-                <h5 class="mb-2">Aún no hay planillas registradas</h5>
-                <p class="text-muted mb-4">Crea tu primera planilla para comenzar.</p>
+                <h5 class="mb-2">No hay planillas para los filtros seleccionados</h5>
+                <p class="text-muted mb-4">
+                    Puedes ajustar el mes y año, o crear una nueva planilla.
+                </p>
                 <a asp-action="Create" class="btn btn-outline-primary">
                     <i class="ti ti-plus me-1"></i> Crear planilla
                 </a>
@@ -47,36 +126,44 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Empleado</th>
-                                <th class="text-end">Salario Base</th>
-                                <th class="text-end">Deducciones</th>
+                                <th class="text-end">Salario base</th>
                                 <th class="text-end">Bonificaciones</th>
-                                <th class="text-end">Total Pago</th>
+                                <th class="text-end">Salario bruto</th>
+                                <th class="text-end">Deducciones</th>
+                                <th class="text-end">Salario neto</th>
                                 <th class="text-center">Periodo</th>
-                                <th class="text-center" style="width: 170px;">Acciones</th>
+                                <th class="text-center">Fecha registro</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="text-secondary">
-                        @foreach (var item in Model)
+                        @foreach (var item in Model.Planillas)
                         {
                             <tr>
                                 <td>@(item.Empleado?.Nombre ?? $"Empleado #{item.EmpleadoId}")</td>
                                 <td class="text-end">@($"₡{item.SalarioBase.ToString("N0", esCR)}")</td>
-                                <td class="text-end">@($"₡{item.Deducciones.ToString("N0", esCR)}")</td>
                                 <td class="text-end">@($"₡{item.Bonificaciones.ToString("N0", esCR)}")</td>
-                                <td class="text-end fw-semibold">@($"₡{item.TotalPago.ToString("N0", esCR)}")</td>
+                                <td class="text-end">@($"₡{item.SalarioBruto.ToString("N0", esCR)}")</td>
+                                <td class="text-end">@($"₡{item.Deducciones.ToString("N0", esCR)}")</td>
+                                <td class="text-end fw-semibold">@($"₡{item.SalarioNeto.ToString("N0", esCR)}")</td>
                                 <td class="text-center">@($"{item.Mes:D2}/{item.Anio}")</td>
+                                <td class="text-center">@item.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+
                                 <td class="text-center text-nowrap">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm px-2 py-1 me-2 d-inline-flex align-items-center rounded-3">
-                                        <i class="ti ti-pencil"></i><span class="ms-1">Editar</span>
+                                    <!-- EDIT -->
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-warning me-1"
+                                       title="Editar planilla">
+                                        <i class="ti ti-pencil"></i>
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm px-2 py-1 d-inline-flex align-items-center rounded-3">
-                                        <i class="ti ti-trash"></i><span class="ms-1">Eliminar</span>
-                                    </a>
-                                    <a asp-controller="ConceptoNomina"
-                                    asp-action="Index"
-                                    asp-route-empleadoId="@item.Empleado"
-                                    class="btn btn-outline-info btn-sm">
-                                    <i class="ti ti-adjustments"></i> Conceptos Activos
+
+                                    <!-- DELETE -->
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-danger"
+                                       title="Eliminar planilla">
+                                        <i class="ti ti-trash"></i>
                                     </a>
                                 </td>
                             </tr>

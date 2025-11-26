@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,32 +8,37 @@ namespace SGA_Smash.Models
     public class Empleado
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
+        [Required]
+        [Column("Nombre")]
         public string Nombre { get; set; }
 
-        [StringLength(100, ErrorMessage = "El puesto no puede exceder 100 caracteres")]
+        [Column("Puesto")]
         public string Puesto { get; set; }
 
-        [Required(ErrorMessage = "El salario base es obligatorio")]
-        [Range(0, double.MaxValue, ErrorMessage = "El salario debe ser mayor a 0")]
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal SalarioBase { get; set; }
+        [Column("SalarioBase", TypeName = "decimal(10,2)")]
+        public decimal? SalarioBase { get; set; }
 
-        [Required(ErrorMessage = "La fecha de ingreso es obligatoria")]
-        [Display(Name = "Fecha de Ingreso")]
-        [DataType(DataType.Date)]
-        public DateTime FechaIngreso { get; set; }
+        [Column("FechaIngreso")]
+        public DateTime? FechaIngreso { get; set; }
 
-        [Required(ErrorMessage = "El estado es obligatorio")]
-        [StringLength(50, ErrorMessage = "El estado no puede exceder 50 caracteres")]
+        [Column("Estado")]
         public string Estado { get; set; }
 
-        [Column("dias_vacaciones_disponibles")]
-        [Range(0, int.MaxValue, ErrorMessage = "Los días disponibles deben ser >= 0")]
-        public int DiasVacacionesDisponibles { get; set; }
+        // Para próxima planilla
+        [Required]
+        [Column("deducciones_fijas", TypeName = "decimal(10,2)")]
+        [Display(Name = "Deducciones fijas")]
+        public decimal DeduccionesFijas { get; set; }
+
+        [Required]
+        [Column("bonificaciones_fijas", TypeName = "decimal(10,2)")]
+        [Display(Name = "Bonificaciones fijas")]
+        public decimal BonificacionesFijas { get; set; }
+
+        [Column("DiasVacacionesDisponibles")]
+        public int DiasVacacionesDisponibles { get; set; } = 0;
     }
 }

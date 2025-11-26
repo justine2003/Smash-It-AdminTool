@@ -1,0 +1,72 @@
+@model IEnumerable<SGA_Smash.Models.HistorialCambiosPlanilla>
+
+@{
+    ViewData["Title"] = "Historial de cambios de planilla";
+    var nombreEmpleado = ViewBag.EmpleadoNombre as string ?? "Empleado";
+    var usuarios = ViewBag.Usuarios as Dictionary<int, string>;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded-3 mt-3">
+                <div class="card-body">
+                    <h3 class="mb-3">Historial de cambios de planilla</h3>
+                    <p class="text-muted mb-3">
+                        Empleado: <strong>@nombreEmpleado</strong>
+                    </p>
+
+                    @if (Model == null || !Model.Any())
+                    {
+                        <div class="alert alert-info">
+                            No se han registrado cambios en deducciones o bonificaciones para este empleado.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Campo</th>
+                                        <th class="text-end">Valor anterior</th>
+                                        <th class="text-end">Valor nuevo</th>
+                                        <th>Usuario</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var h in Model)
+                                {
+                                    <tr>
+                                        <td>@h.FechaCambio.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @(h.CampoModificado == "deducciones_fijas" ? "Deducciones fijas" :
+                                              h.CampoModificado == "bonificaciones_fijas" ? "Bonificaciones fijas" :
+                                              h.CampoModificado)
+                                        </td>
+                                        <td class="text-end">@h.ValorAnterior.ToString("N2")</td>
+                                        <td class="text-end fw-semibold">@h.ValorNuevo.ToString("N2")</td>
+                                        <td>
+                                            @if (usuarios != null && usuarios.ContainsKey(h.UsuarioId))
+                                            {
+                                                @usuarios[h.UsuarioId]
+                                            }
+                                            else
+                                            {
+                                                @h.UsuarioId
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                    <a asp-action="Index" class="btn btn-secondary mt-3">Volver a empleados</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

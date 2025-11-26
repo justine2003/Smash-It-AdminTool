@@ -173,3 +173,23 @@ INSERT INTO Mesas (numero, capacidad, estado) VALUES
 ('M2', 4, 'Disponible'),
 ('M3', 6, 'Disponible'),
 ('M4', 8, 'Disponible');
+
+
+CREATE TABLE HistorialCambiosPlanilla (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    empleado_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    campo_modificado VARCHAR(50) NOT NULL,
+    valor_anterior DECIMAL(10,2) NOT NULL,
+    valor_nuevo DECIMAL(10,2) NOT NULL,
+    fecha_cambio DATETIME NOT NULL DEFAULT(GETDATE()),
+    FOREIGN KEY (empleado_id) REFERENCES Empleado(id),
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+);
+
+ALTER TABLE Empleado
+ADD DiasVacacionesDisponibles INT NOT NULL DEFAULT(0);
+
+ALTER TABLE Planilla
+ADD salario_neto   DECIMAL(10,2) NOT NULL DEFAULT(0),
+    fecha_registro DATETIME      NOT NULL DEFAULT(GETDATE());
