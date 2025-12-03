@@ -7,6 +7,9 @@ using SGA_Smash.Models.ViewModels;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Rotativa.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace SGA_Smash.Controllers
 {
@@ -233,23 +236,43 @@ namespace SGA_Smash.Controllers
             return RedirectToAction("Index", new { mes, anio });
         }
 
-        // EXPORTS (stubs)
+        [HttpGet]
         public async Task<IActionResult> ExportarPdf(int? mes, int? anio)
         {
             if (!EsAdmin())
                 return RedirectToAction("Index", "Home");
 
-            // Aquí iría la lógica real de PDF (QuestPDF, iText, etc.)
-            return NotFound("ExportarPdf aún no implementado.");
-        }
+            var query = _context.Planillas
+                .Include(p => p.Empleado)
+                .AsQueryable();
 
-        public async Task<IActionResult> ExportarExcel(int? mes, int? anio)
-        {
-            if (!EsAdmin())
-                return RedirectToAction("Index", "Home");
+            if (mes.HasValue)
+                query = query.Where(p => p.Mes == mes.Value);
 
-            // Aquí iría la lógica real de Excel (ClosedXML, EPPlus, etc.)
-            return NotFound("ExportarExcel aún no implementado.");
+            if (anio.HasValue)
+                query = query.Where(p => p.Anio == anio.Value);
+
+            var planillas = await query
+                .OrderBy(p => p.Anio)
+                .ThenBy(p => p.Mes)
+                .ThenBy(p => p.Empleado.Nombre)
+                .ToListAsync();
+
+            var vm = new PlanillaReporteViewModel
+            {
+                Planillas = planillas,
+                Mes = mes,
+                Anio = anio
+            };
+
+            var fileName = $"Planilla_{(mes ?? 0):D2}_{(anio ?? DateTime.Now.Year)}.pdf";
+
+            return new ViewAsPdf("ReportePlanillaPdf", vm)
+            {
+                FileName = fileName,
+                PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait
+            };
         }
     }
 }

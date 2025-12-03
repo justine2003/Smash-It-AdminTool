@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Repositories;
 using SGA_Smash.Services;
+using Rotativa.AspNetCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,8 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+app.UseRotativa();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
