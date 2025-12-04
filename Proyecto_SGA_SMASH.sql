@@ -193,3 +193,6 @@ ADD DiasVacacionesDisponibles INT NOT NULL DEFAULT(0);
 ALTER TABLE Planilla
 ADD salario_neto   DECIMAL(10,2) NOT NULL DEFAULT(0),
     fecha_registro DATETIME      NOT NULL DEFAULT(GETDATE());
+
+    ALTER TABLE Empleado
+  ADD dias_vacaciones_disponibles INT NOT NULL CONSTRAINT DF_Empleado_DiasVac DEFAULT (0);

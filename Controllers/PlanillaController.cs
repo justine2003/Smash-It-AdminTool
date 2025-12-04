@@ -1,15 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Models;
 using SGA_Smash.Models.ViewModels;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Rotativa.AspNetCore;
-using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 
 namespace SGA_Smash.Controllers
 {
@@ -178,12 +172,10 @@ namespace SGA_Smash.Controllers
 
             if (!ModelState.IsValid)
             {
-                // volvemos a cargar Empleado si la vista lo usa
                 planilla.Empleado = await _context.Empleados.FindAsync(planilla.EmpleadoId);
                 return View(planilla);
             }
 
-            // Aquí permitimos corregir datos de la planilla específica
             planilla.Mes = model.Mes;
             planilla.Anio = model.Anio;
             planilla.SalarioBase = model.SalarioBase;

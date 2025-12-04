@@ -1,96 +1,106 @@
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SGA_Smash.Repositories
 {
     public class VacacionRepository : IVacacionRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _db;
+        public VacacionRepository(ApplicationDbContext db) => _db = db;
 
-        public VacacionRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        public async Task<IEnumerable<Vacacion>> GetAllAsync() =>
+            await _db.Set<Vacacion>()
+                     .AsNoTracking()
+                     .Include(v => v.Empleado)
+                     .OrderByDescending(v => v.FechaSolicitud)
+                     .ToListAsync();
 
-        public async Task<IEnumerable<Vacacion>> GetAllAsync()
-        {
-            return await _context.Vacaciones.ToListAsync();
-        }
+        public async Task<IEnumerable<Vacacion>> GetByEmpleadoAsync(int empleadoId) =>
+            await _db.Set<Vacacion>()
+                     .AsNoTracking()
+                     .Where(v => v.EmpleadoId == empleadoId)
+                     .OrderByDescending(v => v.FechaSolicitud)
+                     .ToListAsync();
 
-        public async Task<Vacacion?> GetByIdAsync(int id)
-        {
-            return await _context.Vacaciones.FindAsync(id);
-        }
+        public async Task<IEnumerable<Vacacion>> GetPendientesAsync() =>
+            await _db.Set<Vacacion>()
+                     .AsNoTracking()
+                     .Where(v => v.Estado == "Pendiente")
+                     .Include(v => v.Empleado)
+                     .OrderByDescending(v => v.FechaSolicitud)
+                     .ToListAsync();
+
+        public Task<Vacacion?> GetByIdAsync(int id) =>
+            _db.Set<Vacacion>()
+               .AsNoTracking()
+               .Include(v => v.Empleado)
+               .FirstOrDefaultAsync(v => v.Id == id);
+
+        public async Task<bool> ExistsAsync(int id) =>
+            await _db.Set<Vacacion>()
+                     .AsNoTracking()
+                     .AnyAsync(v => v.Id == id);
 
         public async Task AddAsync(Vacacion v)
         {
-            _context.Vacaciones.Add(v);
-            await _context.SaveChangesAsync();
+            _db.Set<Vacacion>().Add(v);
+            await _db.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Vacacion v)
         {
-            _context.Entry(v).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<bool> ExistsAsync(int id)
-        {
-            return await _context.Vacaciones.AnyAsync(e => e.Id == id);
+            _db.Set<Vacacion>().Update(v);
+            await _db.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var vacacion = await _context.Vacaciones.FindAsync(id);
-            if (vacacion != null)
-            {
-                _context.Vacaciones.Remove(vacacion);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        public async Task<IEnumerable<Vacacion>> GetByEmpleadoAsync(int empleadoId)
-        {
-            return await _context.Vacaciones
-                .Where(v => v.EmpleadoId == empleadoId)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Vacacion>> GetPendientesAsync()
-        {
-            return await _context.Vacaciones
-                .Where(v => v.Estado == "Pendiente")
-                .ToListAsync();
+            var v = await _db.Set<Vacacion>().FirstOrDefaultAsync(x => x.Id == id);
+            if (v is null) return;
+            _db.Set<Vacacion>().Remove(v);
+            await _db.SaveChangesAsync();
         }
 
         public async Task<bool> HasOverlapAsync(int empleadoId, DateTime inicio, DateTime fin)
         {
-            return await _context.Vacaciones
-                .AnyAsync(v => v.EmpleadoId == empleadoId &&
-                              v.Estado != "Rechazada" &&
-                              v.FechaInicio < fin &&
-                              v.FechaFin > inicio);
+            return await _db.Set<Vacacion>()
+                            .AsNoTracking()
+                            .Where(v => v.EmpleadoId == empleadoId
+                                     && v.Estado != "Rechazada"
+                                     && v.FechaInicio <= fin
+                                     && v.FechaFin >= inicio)
+                            .AnyAsync();
         }
 
         public async Task ApproveAsync(Vacacion v, int aprobadorId)
         {
+            _db.Attach(v);
             v.Estado = "Aprobada";
             v.AprobadoPor = aprobadorId;
-            _context.Entry(v).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            if (string.IsNullOrWhiteSpace(v.ComentarioAdmin))
+                v.ComentarioAdmin = "Aprobada";
+
+            _db.Entry(v).Property(x => x.Estado).IsModified = true;
+            _db.Entry(v).Property(x => x.AprobadoPor).IsModified = true;
+            _db.Entry(v).Property(x => x.ComentarioAdmin).IsModified = true;
+
+            await _db.SaveChangesAsync();
         }
 
         public async Task RejectAsync(Vacacion v, int aprobadorId)
         {
+            _db.Attach(v);
             v.Estado = "Rechazada";
-            v.AprobadoPor = aprobadorId;
-            _context.Entry(v).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            v.AprobadoPor = null;
+            if (string.IsNullOrWhiteSpace(v.ComentarioAdmin))
+                v.ComentarioAdmin = "Rechazada";
+
+            _db.Entry(v).Property(x => x.Estado).IsModified = true;
+            _db.Entry(v).Property(x => x.AprobadoPor).IsModified = true;
+            _db.Entry(v).Property(x => x.ComentarioAdmin).IsModified = true;
+
+            await _db.SaveChangesAsync();
         }
     }
 }

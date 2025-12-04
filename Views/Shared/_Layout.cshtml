@@ -82,12 +82,7 @@
                                         <i class="ti ti-coin"></i><span class="hide-menu">Gasto</span>
                                     </a>
                                 </li>
-                            }
-
-                            @* Opciones visibles para todos los usuarios logueados *@
-                            @if (rolId > 0)
-                            {
-                                <li class="sidebar-item">
+                                                             <li class="sidebar-item">
                                     <a class="sidebar-link" asp-controller="Cliente" asp-action="Index">
                                         <i class="ti ti-users"></i><span class="hide-menu">Clientes</span>
                                     </a>
@@ -112,6 +107,27 @@
                                         <i class="ti ti-beach"></i><span class="hide-menu">Vacaciones</span>
                                     </a>
                                 </li>
+                            }
+
+                            @* Ejemplo: solo admin puede ver Empleados, Planilla, Gasto *@
+                            @if (rolId == 3) // 3 = Empleado
+                            {
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="VacacionWorkflow" asp-action="Solicitar">
+                                        <i class="ti ti-atom"></i><span class="hide-menu">Solicitar vacaciones</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-controller="VacacionWorkflow" asp-action="Index">
+                                        <i class="ti ti-atom"></i><span class="hide-menu">Mis solicitudes</span>
+                                    </a>
+                                </li>
+                            }
+
+                            @* Opciones visibles para todos los usuarios logueados *@
+                            @if (rolId > 0)
+                            {
+   
                             }
                         </ul>
                     </nav>
