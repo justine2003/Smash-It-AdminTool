@@ -38,7 +38,7 @@ namespace SGA_Smash.Models
         [Display(Name = "Bonificaciones fijas")]
         public decimal BonificacionesFijas { get; set; }
 
-        [Column("DiasVacacionesDisponibles")]
+        [Column("dias_vacaciones_disponibles")]
         public int DiasVacacionesDisponibles { get; set; } = 0;
     }
 }
