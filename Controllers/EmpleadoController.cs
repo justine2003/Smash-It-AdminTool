@@ -22,7 +22,7 @@ namespace SGA_Smash.Controllers
         private bool EsAdmin()
         {
             var rol = HttpContext.Session.GetInt32("Rol") ?? 0;
-            return rol == 1; // asumimos 1 = Admin
+            return rol == 1;
         }
 
         private int? UsuarioActualId()
@@ -71,7 +71,6 @@ namespace SGA_Smash.Controllers
                 return View(empleado);
             }
 
-            // por si acaso queremos impedir valores negativos:
             if (empleado.DeduccionesFijas < 0)
             {
                 ModelState.AddModelError("DeduccionesFijas", "Las deducciones no pueden ser negativas.");
@@ -128,8 +127,6 @@ namespace SGA_Smash.Controllers
             empleado.SalarioBase = model.SalarioBase;
             empleado.FechaIngreso = model.FechaIngreso;
             empleado.Estado = model.Estado;
-
-            // NO tocar DeduccionesFijas ni BonificacionesFijas aquí
 
             await _context.SaveChangesAsync();
 

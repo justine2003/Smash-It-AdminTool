@@ -1,74 +1,50 @@
-using System;
-using System.Threading.Tasks;
+using SGA_Smash.Models;
 using SGA_Smash.Repositories;
 
 namespace SGA_Smash.Services
 {
     public class VacacionPolicyService : IVacacionPolicyService
     {
-        private readonly IVacacionRepository _vacacionRepository;
-        private readonly IEmpleadoRepository _empleadoRepository;
-        private const int DiasPorAnio = 15; // Política de vacaciones
+        private readonly IVacacionRepository _repo;
+        private readonly IEmpleadoRepository _empleados;
 
-        public VacacionPolicyService(IVacacionRepository vacacionRepository, IEmpleadoRepository empleadoRepository)
+        public VacacionPolicyService(IVacacionRepository repo, IEmpleadoRepository empleados)
         {
-            _vacacionRepository = vacacionRepository;
-            _empleadoRepository = empleadoRepository;
+            _repo = repo;
+            _empleados = empleados;
         }
 
-        public async Task<(bool ok, string? error, int dias)> ValidarSolicitudAsync(int empleadoId, DateTime inicio, DateTime fin)
+        public async Task<VacacionValidationResult> ValidarSolicitudAsync(Vacacion v)
         {
-            // Validar que el empleado existe
-            if (!await _empleadoRepository.EmpleadoExistsAsync(empleadoId))
-            {
-                return (false, "Empleado no encontrado", 0);
-            }
+            var hoy = DateTime.Today;
 
-            // Validar fechas
-            if (inicio >= fin)
-            {
-                return (false, "La fecha de inicio debe ser menor a la fecha de fin", 0);
-            }
+            if (v.FechaInicio.Date < hoy)
+                return new VacacionValidationResult(false, "No se permiten fechas de inicio en el pasado.");
 
-            if (inicio < DateTime.Now.Date)
-            {
-                return (false, "No se pueden solicitar vacaciones en fechas pasadas", 0);
-            }
+            if (v.FechaFin.Date < v.FechaInicio.Date)
+                return new VacacionValidationResult(false, "La fecha fin no puede ser anterior a la fecha inicio.");
 
-            // Validar que no haya superposición
-            if (await _vacacionRepository.HasOverlapAsync(empleadoId, inicio, fin))
-            {
-                return (false, "Ya existe una solicitud de vacaciones en este período", 0);
-            }
+            var dias = (int)(v.FechaFin.Date - v.FechaInicio.Date).TotalDays + 1;
+            if (dias <= 0)
+                return new VacacionValidationResult(false, "Los días solicitados deben ser mayores a cero.");
 
-            // Calcular días solicitados
-            int diasSolicitados = (int)(fin - inicio).TotalDays;
+            var disponibles = await _empleados.GetDiasDisponiblesAsync(v.EmpleadoId);
+            if (dias > disponibles)
+                return new VacacionValidationResult(false, $"No hay suficientes días. Disponibles: {disponibles}, solicitados: {dias}.");
 
-            // Obtener días disponibles
-            int diasDisponibles = await _empleadoRepository.GetDiasDisponiblesAsync(empleadoId);
+            var solapa = await _repo.HasOverlapAsync(v.EmpleadoId, v.FechaInicio.Date, v.FechaFin.Date);
+            if (solapa)
+                return new VacacionValidationResult(false, "El período se solapa con otra solicitud pendiente o aprobada.");
 
-            if (diasSolicitados > diasDisponibles)
-            {
-                return (false, $"No tiene suficientes días de vacaciones disponibles. Tiene {diasDisponibles} días", 0);
-            }
-
-            return (true, null, diasSolicitados);
+            return new VacacionValidationResult(true);
         }
 
-        public async Task AplicarAprobacionAsync(int vacacionId)
+        public async Task AplicarAprobacionAsync(Vacacion v)
         {
-            var vacacion = await _vacacionRepository.GetByIdAsync(vacacionId);
-            if (vacacion == null)
-                return;
-
-            // Calcular días utilizados
-            int diasUtilizados = (int)(vacacion.FechaFin - vacacion.FechaInicio).TotalDays;
-
-            // Restar de los días disponibles
-            int diasActuales = await _empleadoRepository.GetDiasDisponiblesAsync(vacacion.EmpleadoId);
-            int nuevosDias = diasActuales - diasUtilizados;
-
-            await _empleadoRepository.SetDiasDisponiblesAsync(vacacion.EmpleadoId, nuevosDias < 0 ? 0 : nuevosDias);
+            var disp = await _empleados.GetDiasDisponiblesAsync(v.EmpleadoId);
+            var nuevos = disp - v.DiasSolicitados;
+            if (nuevos < 0) nuevos = 0;
+            await _empleados.SetDiasDisponiblesAsync(v.EmpleadoId, nuevos);
         }
     }
 }
