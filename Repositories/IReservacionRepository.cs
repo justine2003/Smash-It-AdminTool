@@ -10,5 +10,8 @@ namespace SGA_Smash.Repositories
         Task UpdateReservacion(Reservacion reservacion);
         Task DeleteReservacion(int id);
         Task<bool> ReservacionExists(int id);
+        Task<IEnumerable<HorarioDemanda>> GetHorariosConMasDemanda(DateTime? desde, DateTime? hasta, int top);
+        Task<IEnumerable<Reservacion>> GetReservacionesConfirmadasYCanceladas(DateTime? desde, DateTime? hasta);
+        Task<List<MesaDisponible>> GetMesasDisponibles(DateTime fechaHora, int numeroPersonas, int? reservacionIdExcluir = null);
     }
 }

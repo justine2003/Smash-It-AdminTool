@@ -24,6 +24,7 @@ namespace SGA_Smash.Data
         public DbSet<Gasto> Gasto { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
          public DbSet<HistorialCambiosPlanilla> HistorialCambiosPlanillas { get; set; }
+        public DbSet<Mesa> Mesas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -134,6 +135,17 @@ namespace SGA_Smash.Data
                 entity.ToTable("Gasto");
 
                 entity.HasOne(g => g.RegistroEmpleado).WithMany().HasForeignKey(g => g.registrado_por);
+            });
+
+            // Configuración para Mesa
+            modelBuilder.Entity<Mesa>(entity =>
+            {
+                entity.ToTable("Mesas");
+                entity.HasKey(m => m.Id);
+                entity.Property(m => m.Id).HasColumnName("id");
+                entity.Property(m => m.Numero).HasColumnName("numero").HasMaxLength(10);
+                entity.Property(m => m.Capacidad).HasColumnName("capacidad");
+                entity.Property(m => m.Estado).HasColumnName("estado").HasMaxLength(20);
             });
         }
 

@@ -26,6 +26,11 @@ builder.Services.AddScoped<IConceptoNominaRepository, ConceptoNominaRepository>(
 builder.Services.AddScoped<IPlanillaCalculoService, PlanillaCalculoService>();
 builder.Services.AddScoped<IVacacionRepository, VacacionRepository>();
 builder.Services.AddScoped<IContratoProveedorRepository, ContratoProveedorRepository>();
+
+// Reservaciones
+builder.Services.AddScoped<IReservacionRepository, ReservacionRepository>();
+builder.Services.AddScoped<IReservacionReportService, ReservacionReportService>();
+
 // Services
 builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
 builder.Services.AddScoped<INotificationService, EmailNotificationService>();

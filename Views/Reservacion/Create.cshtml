@@ -51,8 +51,11 @@
                         <!-- Mesa -->
                         <div class="mb-3">
                             <label asp-for="Mesa" class="form-label">Mesa</label>
-                            <input asp-for="Mesa" class="form-control" />
+                            <select asp-for="Mesa" class="form-select" id="mesaSelect">
+                                <option value="">-- Selecciona una mesa --</option>
+                            </select>
                             <span asp-validation-for="Mesa" class="text-danger"></span>
+                            <small class="form-text text-muted" id="mesaInfo">Selecciona una fecha y hora para ver las mesas disponibles</small>
                         </div>
 
                         <!-- Número de Personas -->    
@@ -90,4 +93,71 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $(document).ready(function() {
+            const fechaHoraInput = $('#FechaHora');
+            const numeroPersonasInput = $('#NumeroPersonas');
+            const mesaSelect = $('#mesaSelect');
+            const mesaInfo = $('#mesaInfo');
+
+            // Función para cargar mesas disponibles
+            function cargarMesasDisponibles() {
+                const fechaHora = fechaHoraInput.val();
+                const numeroPersonas = parseInt(numeroPersonasInput.val()) || 0;
+                
+                if (!fechaHora) {
+                    mesaSelect.html('<option value="">-- Selecciona una fecha y hora primero --</option>');
+                    mesaInfo.text('Selecciona una fecha y hora para ver las mesas disponibles');
+                    return;
+                }
+
+                if (!numeroPersonas || numeroPersonas < 1) {
+                    mesaSelect.html('<option value="">-- Ingresa el número de personas primero --</option>');
+                    mesaInfo.text('Ingresa el número de personas para ver las mesas disponibles');
+                    return;
+                }
+
+                // Convertir la fecha/hora local a formato para la API
+                const fechaHoraObj = new Date(fechaHora);
+                const fechaHoraISO = fechaHoraObj.toISOString();
+
+                mesaInfo.text('Cargando mesas disponibles...');
+                mesaSelect.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("GetMesasDisponibles", "Reservacion")',
+                    type: 'GET',
+                    data: { 
+                        fechaHora: fechaHoraISO,
+                        numeroPersonas: numeroPersonas
+                    },
+                    success: function(mesas) {
+                        mesaSelect.html('<option value="">-- Selecciona una mesa --</option>');
+                        
+                        if (mesas && mesas.length > 0) {
+                            mesas.forEach(function(mesa) {
+                                const optionText = mesa.numero + ' (Capacidad: ' + mesa.capacidad + ' personas)';
+                                mesaSelect.append($('<option></option>').val(mesa.numero).text(optionText));
+                            });
+                            mesaInfo.text(mesas.length + ' mesa(s) disponible(s) para ' + numeroPersonas + ' persona(s)');
+                        } else {
+                            mesaSelect.html('<option value="">-- No hay mesas disponibles --</option>');
+                            mesaInfo.text('No hay mesas disponibles para ' + numeroPersonas + ' persona(s) en esta fecha y hora');
+                        }
+                        
+                        mesaSelect.prop('disabled', false);
+                    },
+                    error: function() {
+                        mesaSelect.html('<option value="">-- Error al cargar mesas --</option>');
+                        mesaInfo.text('Error al cargar las mesas disponibles');
+                        mesaSelect.prop('disabled', false);
+                    }
+                });
+            }
+
+            // Cargar mesas cuando cambie la fecha/hora o el número de personas
+            fechaHoraInput.on('change', cargarMesasDisponibles);
+            numeroPersonasInput.on('change', cargarMesasDisponibles);
+        });
+    </script>
 }

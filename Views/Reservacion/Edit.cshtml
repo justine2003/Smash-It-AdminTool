@@ -18,7 +18,11 @@
                 </div>
                 <div class="mb-3">
                     <label asp-for="Mesa" class="form-label">Mesa</label>
-                    <input asp-for="Mesa" class="form-control" />
+                    <select asp-for="Mesa" class="form-select" id="mesaSelect">
+                        <option value="@Model.Mesa">@Model.Mesa (Actual)</option>
+                    </select>
+                    <span asp-validation-for="Mesa" class="text-danger"></span>
+                    <small class="form-text text-muted" id="mesaInfo">Selecciona una nueva fecha y hora para ver las mesas disponibles</small>
                 </div>
                 <div class="mb-3">
                     <label asp-for="NumeroPersonas" class="form-label">Número de Personas</label>
@@ -40,3 +44,82 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function() {
+            const fechaHoraInput = $('#FechaHora');
+            const numeroPersonasInput = $('#NumeroPersonas');
+            const mesaSelect = $('#mesaSelect');
+            const mesaInfo = $('#mesaInfo');
+            const mesaActual = '@Model.Mesa';
+            const reservacionId = @Model.Id;
+
+            // Función para cargar mesas disponibles
+            function cargarMesasDisponibles() {
+                const fechaHora = fechaHoraInput.val();
+                const numeroPersonas = parseInt(numeroPersonasInput.val()) || @Model.NumeroPersonas;
+                
+                if (!fechaHora) {
+                    mesaSelect.html('<option value="' + mesaActual + '">' + mesaActual + ' (Actual)</option>');
+                    mesaInfo.text('Selecciona una nueva fecha y hora para ver las mesas disponibles');
+                    return;
+                }
+
+                if (!numeroPersonas || numeroPersonas < 1) {
+                    mesaSelect.html('<option value="' + mesaActual + '">' + mesaActual + ' (Actual)</option>');
+                    mesaInfo.text('Ingresa el número de personas para ver las mesas disponibles');
+                    return;
+                }
+
+                // Convertir la fecha/hora local a formato para la API
+                const fechaHoraObj = new Date(fechaHora);
+                const fechaHoraISO = fechaHoraObj.toISOString();
+
+                mesaInfo.text('Cargando mesas disponibles...');
+                mesaSelect.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("GetMesasDisponibles", "Reservacion")',
+                    type: 'GET',
+                    data: { 
+                        fechaHora: fechaHoraISO, 
+                        numeroPersonas: numeroPersonas,
+                        reservacionId: reservacionId 
+                    },
+                    success: function(mesas) {
+                        // Siempre incluir la mesa actual como primera opción
+                        mesaSelect.html('<option value="' + mesaActual + '">' + mesaActual + ' (Actual)</option>');
+                        
+                        if (mesas && mesas.length > 0) {
+                            mesas.forEach(function(mesa) {
+                                // No agregar la mesa actual dos veces
+                                if (mesa.numero !== mesaActual) {
+                                    const optionText = mesa.numero + ' (Capacidad: ' + mesa.capacidad + ' personas)';
+                                    mesaSelect.append($('<option></option>').val(mesa.numero).text(optionText));
+                                }
+                            });
+                            mesaInfo.text(mesas.length + ' mesa(s) disponible(s) para ' + numeroPersonas + ' persona(s) (excluyendo la actual)');
+                        } else {
+                            mesaInfo.text('No hay otras mesas disponibles para ' + numeroPersonas + ' persona(s) en esta fecha y hora. La mesa actual se mantendrá.');
+                        }
+                        
+                        mesaSelect.prop('disabled', false);
+                    },
+                    error: function() {
+                        mesaSelect.html('<option value="' + mesaActual + '">' + mesaActual + ' (Actual)</option>');
+                        mesaInfo.text('Error al cargar las mesas disponibles. Se mantendrá la mesa actual.');
+                        mesaSelect.prop('disabled', false);
+                    }
+                });
+            }
+
+            // Cargar mesas cuando cambie la fecha/hora o el número de personas
+            fechaHoraInput.on('change', cargarMesasDisponibles);
+            numeroPersonasInput.on('change', cargarMesasDisponibles);
+        });
+    </script>
+}
