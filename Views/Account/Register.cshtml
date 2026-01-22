@@ -91,11 +91,9 @@
                                     <label asp-for="contrasena" class="form-label text-white"></label>
                                     <input asp-for="contrasena" type="password" class="form-control" />
                                     <span asp-validation-for="contrasena" class="text-danger"></span>
+                                    <input type="hidden" asp-for="rol_id" value="1" />
                                 </div>
 
-                                @* Si quieres setear el rol fijo, puedes usar un hidden:
-                                   <input type="hidden" asp-for="rol_id" value="2" />
-                                *@
 
                                 <button type="submit"
                                         class="btn btn-smash-red w-100 py-8 fs-4 mb-2 rounded-2">

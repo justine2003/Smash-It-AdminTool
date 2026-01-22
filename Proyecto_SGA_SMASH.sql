@@ -10,6 +10,8 @@ CREATE TABLE Roles (
     descripcion VARCHAR(255)
 );
 
+INSERT INTO Roles values ('admin', 'administrador');
+INSERT INTO Roles values ('user', 'user');
 
 -- Tabla Empleado
     CREATE TABLE Empleado (
@@ -18,7 +20,10 @@ CREATE TABLE Roles (
     Puesto VARCHAR(100),
     SalarioBase DECIMAL(10, 2),
     FechaIngreso DATE,
-    Estado VARCHAR(50)
+    Estado VARCHAR(50),
+	deducciones_fijas DECIMAL(10,2),
+    bonificaciones_fijas DECIMAL(10,2),
+	dias_vacaciones_disponibles INT NOT NULL DEFAULT 0
 );
 
 -- Tabla Vacacion
@@ -31,8 +36,9 @@ CREATE TABLE Vacacion (
     dias_solicitados INT,
     fecha_solicitud DATE,
     aprobado_por INT,
+	comentario_admin VARCHAR(100),
     FOREIGN KEY (empleado_id) REFERENCES Empleado(id),
-    FOREIGN KEY (aprobado_por) REFERENCES Empleado(id)
+    FOREIGN KEY (aprobado_por) REFERENCES Empleado(id),
 );
 
 -- Tabla Planilla
@@ -44,6 +50,8 @@ CREATE TABLE Planilla (
     salario_base DECIMAL(10, 2),
     bonificaciones DECIMAL(10, 2),
     deducciones DECIMAL(10, 2),
+	salario_neto DECIMAL(10, 2),
+	fecha_registro DATETIME,
     FOREIGN KEY (empleado_id) REFERENCES Empleado(id)
 );
 
@@ -58,6 +66,8 @@ CREATE TABLE Usuario (
     ultimo_acceso DATETIME,
     FOREIGN KEY (rol_id) REFERENCES Roles(id)
 );
+
+INSERT INTO Usuario values ('Admin', 'admin@gmail.com', 1, '12345678', GETDATE(), GETDATE()); 
 
 -- Tabla Cliente
 CREATE TABLE Cliente (
@@ -145,9 +155,6 @@ CREATE TABLE Producto_Proveedor (
     FOREIGN KEY (proveedor_id) REFERENCES Proveedor(id)
 );
 
-
-ALTER TABLE Empleado ADD dias_vacaciones_disponibles INT NOT NULL DEFAULT 0;
-
 --Tabla Contrato
 CREATE TABLE ContratoProveedor (
     id INT PRIMARY KEY IDENTITY(1,1),
@@ -174,7 +181,6 @@ INSERT INTO Mesas (numero, capacidad, estado) VALUES
 ('M3', 6, 'Disponible'),
 ('M4', 8, 'Disponible');
 
-
 CREATE TABLE HistorialCambiosPlanilla (
     id INT PRIMARY KEY IDENTITY(1,1),
     empleado_id INT NOT NULL,
@@ -186,13 +192,3 @@ CREATE TABLE HistorialCambiosPlanilla (
     FOREIGN KEY (empleado_id) REFERENCES Empleado(id),
     FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
 );
-
-ALTER TABLE Empleado
-ADD DiasVacacionesDisponibles INT NOT NULL DEFAULT(0);
-
-ALTER TABLE Planilla
-ADD salario_neto   DECIMAL(10,2) NOT NULL DEFAULT(0),
-    fecha_registro DATETIME      NOT NULL DEFAULT(GETDATE());
-
-    ALTER TABLE Empleado
-  ADD dias_vacaciones_disponibles INT NOT NULL CONSTRAINT DF_Empleado_DiasVac DEFAULT (0);
