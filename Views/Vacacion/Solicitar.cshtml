@@ -1,59 +1,76 @@
 @model SGA_Smash.Models.Vacacion
 @{
-    ViewData["Title"] = "Solicitar Vacaciones";
-    var empleadoId = (int)ViewBag.EmpleadoId;
+    ViewData["Title"] = "Solicitar vacaciones";
+    var disponibles = (int)(ViewBag.Disponibles ?? 0);
+    var hoy = DateTime.Today.ToString("yyyy-MM-dd");
 }
 <div class="container-fluid">
-  <div class="row"><div class="col-12">
-    <div class="card rounded-3"><div class="card-body">
-      <h4 class="card-title">Solicitar Vacaciones</h4>
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Solicitar vacaciones</h3>
+      <a asp-action="MisSolicitudes" class="btn btn-secondary">Mis solicitudes</a>
+    </div>
+  </div>
 
+  <div class="alert alert-info">
+    Días disponibles: <strong>@disponibles</strong>
+  </div>
+
+  <div class="card rounded-3">
+    <div class="card-body">
       <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
       <form asp-action="Solicitar" method="post" novalidate>
-        <input type="hidden" asp-for="EmpleadoId" value="@empleadoId" />
-
-        <div class="row g-2">
-          <div class="col-md-6 mb-3">
-            <label asp-for="FechaInicio" class="form-label">Fecha Inicio</label>
-            <input asp-for="FechaInicio" type="date" class="form-control" id="FechaInicio" required />
+        <input type="hidden" asp-for="EmpleadoId" />
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label asp-for="FechaInicio" class="form-label">Fecha inicio</label>
+            <input asp-for="FechaInicio" type="date" class="form-control" id="FechaInicio" min="@hoy" />
             <span asp-validation-for="FechaInicio" class="text-danger"></span>
           </div>
-          <div class="col-md-6 mb-3">
-            <label asp-for="FechaFin" class="form-label">Fecha Fin</label>
-            <input asp-for="FechaFin" type="date" class="form-control" id="FechaFin" required />
+          <div class="col-md-4">
+            <label asp-for="FechaFin" class="form-label">Fecha fin</label>
+            <input asp-for="FechaFin" type="date" class="form-control" id="FechaFin" min="@hoy" />
             <span asp-validation-for="FechaFin" class="text-danger"></span>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Días solicitados</label>
+            <input id="dias" class="form-control" value="@Model.DiasCalculados" readonly />
           </div>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Días Solicitados (estimado)</label>
-          <input id="DiasCalc" class="form-control" type="text" value="0" readonly />
+        <div class="mt-4">
+          <button id="btnEnviar" class="btn btn-primary"><i class="ti ti-send me-1"></i> Enviar solicitud</button>
+          <a asp-action="MisSolicitudes" class="btn btn-outline-secondary ms-2">Cancelar</a>
         </div>
-
-        <button class="btn btn-primary"><i class="ti ti-send me-1"></i> Enviar solicitud</button>
-        <a asp-action="MisSolicitudes" asp-route-empleadoId="@empleadoId" class="btn btn-secondary ms-2">Cancelar</a>
       </form>
-    </div></div>
-  </div></div>
+    </div>
+  </div>
 </div>
 
-@section Scripts{
+@section Scripts {
   <partial name="_ValidationScriptsPartial" />
   <script>
-    (function () {
-      const fi = document.getElementById("FechaInicio");
-      const ff = document.getElementById("FechaFin");
-      const dc = document.getElementById("DiasCalc");
-      function calc() {
-        const a = new Date(fi.value), b = new Date(ff.value);
-        if (!isNaN(a) && !isNaN(b)) {
-          const d = Math.floor((b - a) / (1000*60*60*24)) + 1;
-          dc.value = d > 0 ? d : 0;
-        } else dc.value = 0;
-      }
-      [fi, ff].forEach(el => el && el.addEventListener('change', calc));
-      calc();
-    })();
+    const disp = @disponibles;
+    const fi = document.getElementById("FechaInicio");
+    const ff = document.getElementById("FechaFin");
+    const d  = document.getElementById("dias");
+    const btn= document.getElementById("btnEnviar");
+
+    function calc() {
+      if (!fi.value || !ff.value) { d.value = ""; btn.disabled = false; return; }
+      const a = new Date(fi.value);
+      const b = new Date(ff.value);
+      const ms = (b - a);
+      const days = Math.floor(ms / (1000*60*60*24)) + 1;
+      d.value = isNaN(days) ? "" : days;
+
+      // bloqueo cliente si excede disponibles o si fin < inicio
+      const ok = !isNaN(days) && days > 0 && days <= disp && b >= a;
+      btn.disabled = !ok;
+    }
+
+    fi?.addEventListener("change", calc);
+    ff?.addEventListener("change", calc);
+    calc();
   </script>
 }

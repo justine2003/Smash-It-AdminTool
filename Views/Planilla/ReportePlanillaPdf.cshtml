@@ -1,0 +1,183 @@
+@model SGA_Smash.Models.ViewModels.PlanillaReporteViewModel
+@using System.Globalization
+
+@{
+    Layout = null; // importante para PDF
+    var esCR = new CultureInfo("es-CR");
+
+    // URL absoluta al logo (para que wkhtmltopdf pueda verlo)
+    var logoUrl = $"{Context.Request.Scheme}://{Context.Request.Host}" +
+                  Url.Content("~/assets/images/logos/smashlogo.svg");
+
+    // Datos de la empresa: cámbialos a tu gusto
+    var empresaNombre = "SMASH IT Burgers & More";
+    var empresaCedula = "Cédula Jurídica: 3-101-123456";
+    var empresaDireccion = "San José, Costa Rica";
+    var empresaTelefono = "Tel: +506 8888-8888";
+    var empresaCorreo = "Email: info@smashit.cr";
+
+    string periodoTexto;
+    if (Model.Mes.HasValue && Model.Anio.HasValue)
+    {
+        var nombreMes = esCR.TextInfo.ToTitleCase(esCR.DateTimeFormat.GetMonthName(Model.Mes.Value));
+        periodoTexto = $"{nombreMes} {Model.Anio.Value}";
+    }
+    else
+    {
+        periodoTexto = "Todos los períodos";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Reporte de planillas</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            margin: 20px;
+        }
+
+        .header {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .header-table {
+            width: 100%;
+        }
+
+        .header-table td {
+            vertical-align: top;
+        }
+
+        .empresa-nombre {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .empresa-detalle {
+            font-size: 10px;
+            color: #555;
+        }
+
+        .titulo-reporte {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .periodo {
+            text-align: center;
+            font-size: 11px;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            border: 1px solid #ccc;
+            padding: 4px;
+            font-size: 10px;
+            text-align: left;
+        }
+
+        td {
+            border: 1px solid #ccc;
+            padding: 4px;
+            font-size: 10px;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 9px;
+            color: #777;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <!-- ENCABEZADO CON LOGO Y DATOS -->
+    <div class="header">
+        <table class="header-table">
+            <tr>
+                <td style="width: 80px;">
+                    <img src="@logoUrl" alt="Logo" style="height: 60px;" />
+                </td>
+                <td>
+                    <div class="empresa-nombre">@empresaNombre</div>
+                    <div class="empresa-detalle">@empresaCedula</div>
+                    <div class="empresa-detalle">@empresaDireccion</div>
+                    <div class="empresa-detalle">@empresaTelefono</div>
+                    <div class="empresa-detalle">@empresaCorreo</div>
+                </td>
+                <td style="text-align: right; font-size: 10px;">
+                    Fecha de generación:<br />
+                    @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- TÍTULO -->
+    <div class="titulo-reporte">Reporte de planillas</div>
+    <div class="periodo">Período: @periodoTexto</div>
+
+    @if (Model.Planillas == null || !Model.Planillas.Any())
+    {
+        <p>No hay planillas para los filtros seleccionados.</p>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th class="text-center">Mes/Año</th>
+                    <th class="text-right">Salario base</th>
+                    <th class="text-right">Bonificaciones</th>
+                    <th class="text-right">Salario bruto</th>
+                    <th class="text-right">Deducciones</th>
+                    <th class="text-right">Salario neto</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var p in Model.Planillas)
+            {
+                <tr>
+                    <td>@(p.Empleado?.Nombre ?? $"Empleado #{p.EmpleadoId}")</td>
+                    <td class="text-center">@($"{p.Mes:D2}/{p.Anio}")</td>
+                    <td class="text-right">@($"₡{p.SalarioBase.ToString("N0", esCR)}")</td>
+                    <td class="text-right">@($"₡{p.Bonificaciones.ToString("N0", esCR)}")</td>
+                    <td class="text-right">@($"₡{p.SalarioBruto.ToString("N0", esCR)}")</td>
+                    <td class="text-right">@($"₡{p.Deducciones.ToString("N0", esCR)}")</td>
+                    <td class="text-right">@($"₡{p.SalarioNeto.ToString("N0", esCR)}")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+
+    <div class="footer">
+        Sistema SGA-Smash &mdash; Reporte generado automáticamente
+    </div>
+</body>
+</html>

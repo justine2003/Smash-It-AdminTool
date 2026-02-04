@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Models;
+using SGA_Smash.Repositories;
+using SGA_Smash.Services;
 
 namespace SGA_Smash.Controllers
 {
@@ -10,11 +12,16 @@ namespace SGA_Smash.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<ReservacionController> _logger;
+        private readonly IReservacionRepository _reservacionRepository;
 
-        public ReservacionController(ApplicationDbContext context, ILogger<ReservacionController> logger)
+        public ReservacionController(
+            ApplicationDbContext context,
+            ILogger<ReservacionController> logger,
+            IReservacionRepository reservacionRepository)
         {
             _context = context;
             _logger = logger;
+            _reservacionRepository = reservacionRepository;
         }
 
         // LISTADO
@@ -80,23 +87,17 @@ namespace SGA_Smash.Controllers
             {
                 try
                 {
-                    // Manejo de FK registrado_por: si no existe Usuario 1, permitir null
-                    reservacion.RegistradoPor = 1;
+                    // El campo registrado_por se mantiene como null (no se muestra en el formulario)
+                    reservacion.RegistradoPor = null;
                     _context.Reservaciones.Add(reservacion);
                     await _context.SaveChangesAsync();
                     TempData["Success"] = "Reservación creada correctamente.";
                     return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateException)
+                catch (Exception ex)
                 {
-                    _logger.LogWarning("Fallo al guardar con RegistradoPor=1. Reintentando con null.");
-                    // Reintentar sin registrado_por si hay error de FK
-                    _context.ChangeTracker.Clear();
-                    reservacion.RegistradoPor = null;
-                    _context.Reservaciones.Add(reservacion);
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Reservación creada (sin usuario registrado).";
-                    return RedirectToAction(nameof(Index));
+                    _logger.LogError(ex, "Error al guardar la reservación");
+                    TempData["Error"] = "Error al crear la reservación. Intente nuevamente.";
                 }
             }
 
@@ -220,6 +221,60 @@ namespace SGA_Smash.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+
+
+        // GET: Horarios con más demanda
+        public async Task<IActionResult> HorariosDemanda(DateTime? desde, DateTime? hasta, int top = 10)
+        {
+            try
+            {
+                _logger.LogInformation("Obteniendo horarios con más demanda. Desde: {Desde}, Hasta: {Hasta}, Top: {Top}", desde, hasta, top);
+                
+                if (top < 1 || top > 50)
+                {
+                    top = 10; // Valor por defecto si está fuera del rango
+                }
+
+                var horarios = await _reservacionRepository.GetHorariosConMasDemanda(desde, hasta, top);
+                var horariosList = horarios?.ToList() ?? new List<HorarioDemanda>();
+                
+                _logger.LogInformation("Se encontraron {Count} horarios con más demanda", horariosList.Count);
+
+                ViewBag.Desde = desde;
+                ViewBag.Hasta = hasta;
+                ViewBag.Top = top;
+                
+                if (!horariosList.Any())
+                {
+                    TempData["Info"] = "No se encontraron reservaciones confirmadas en el rango de fechas especificado.";
+                }
+
+                return View(horariosList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener horarios con más demanda. Detalles: {Message}", ex.Message);
+                TempData["Error"] = $"Error al obtener los horarios con más demanda: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // GET: API endpoint para obtener mesas disponibles
+        [HttpGet]
+        public async Task<IActionResult> GetMesasDisponibles(DateTime fechaHora, int numeroPersonas, int? reservacionId = null)
+        {
+            try
+            {
+                var mesasDisponibles = await _reservacionRepository.GetMesasDisponibles(fechaHora, numeroPersonas, reservacionId);
+                return Json(mesasDisponibles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener mesas disponibles");
+                return Json(new List<object>());
+            }
         }
 
     }

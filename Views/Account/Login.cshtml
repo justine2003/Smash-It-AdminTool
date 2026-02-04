@@ -87,10 +87,22 @@
                                 <button type="submit"
                                     class="btn btn-smash-red w-100 py-8 fs-4 mb-4 rounded-2">Ingresar</button>
 
+                                <a asp-controller="Account"
+                                asp-action="Register"
+                                class="btn btn-outline-light w-100 mb-4 rounded-2">
+                                    Registrar nuevo usuario
+                                </a>
+
+                                @if (TempData["Mensaje"] != null)
+                                {
+                                    <div class="alert alert-success text-center">@TempData["Mensaje"]</div>
+                                }
+
                                 @if (ViewBag.Mensaje != null)
                                 {
                                     <div class="alert alert-danger text-center">@ViewBag.Mensaje</div>
                                 }
+
                             </form>
                         </div>
                     </div>

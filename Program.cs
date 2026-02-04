@@ -2,8 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using SGA_Smash.Data;
 using SGA_Smash.Repositories;
 using SGA_Smash.Services;
+using Rotativa.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSession();
 
 //Registra el contexto de base de datos en el contenedor de dependencias
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -22,14 +26,22 @@ builder.Services.AddScoped<IConceptoNominaRepository, ConceptoNominaRepository>(
 builder.Services.AddScoped<IPlanillaCalculoService, PlanillaCalculoService>();
 builder.Services.AddScoped<IVacacionRepository, VacacionRepository>();
 builder.Services.AddScoped<IContratoProveedorRepository, ContratoProveedorRepository>();
+
+// Reservaciones
+builder.Services.AddScoped<IReservacionRepository, ReservacionRepository>();
+builder.Services.AddScoped<IReservacionReportService, ReservacionReportService>();
+
 // Services
 builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
 builder.Services.AddScoped<INotificationService, EmailNotificationService>();
 builder.Services.AddScoped<IVacacionPolicyService, VacacionPolicyService>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+app.UseRotativa();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -43,6 +55,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthorization();
 

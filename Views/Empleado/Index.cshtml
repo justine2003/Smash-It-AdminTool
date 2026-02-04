@@ -1,4 +1,9 @@
 @model IEnumerable<SGA_Smash.Models.Empleado>
+@using System.Globalization
+
+@{
+    var esCR = new CultureInfo("es-CR");
+}
 
 <div class="container-fluid">
     <div class="row">
@@ -8,7 +13,7 @@
                     <div class="d-md-flex align-items-center justify-content-between">
                         <div>
                             <h4 class="card-title">Empleados Registrados</h4>
-                            <p class="card-subtitle">Lista con datos demostrativos</p>
+                            <p class="card-subtitle">Lista de empleados del sistema</p>
                         </div>
                         <div>
                             <a asp-action="Create" class="btn btn-primary">
@@ -23,7 +28,7 @@
                                 <tr>
                                     <th class="px-0 text-muted">Nombre</th>
                                     <th class="px-0 text-muted">Puesto</th>
-                                    <th class="px-0 text-muted">Salario</th>
+                                    <th class="px-0 text-muted">Salario base</th>
                                     <th class="px-0 text-muted">Ingreso</th>
                                     <th class="px-0 text-muted">Estado</th>
                                     <th class="px-0 text-muted text-end">Acciones</th>
@@ -35,8 +40,32 @@
                                     <tr>
                                         <td class="px-0">@empleado.Nombre</td>
                                         <td class="px-0">@empleado.Puesto</td>
-                                        <td class="px-0">₡@empleado.SalarioBase.ToString("N0")</td>
-                                        <td class="px-0">@empleado.FechaIngreso.ToString("dd/MM/yyyy")</td>
+
+                                        <!-- Salario base -->
+                                        <td class="px-0">
+                                            @if (empleado.SalarioBase.HasValue)
+                                            {
+                                                @($"₡{empleado.SalarioBase.Value.ToString("N0")}")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin salario</span>
+                                            }
+                                        </td>
+
+                                        <!-- Fecha de ingreso -->
+                                        <td class="px-0">
+                                            @if (empleado.FechaIngreso.HasValue)
+                                            {
+                                                @empleado.FechaIngreso.Value.ToString("dd/MM/yyyy")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/D</span>
+                                            }
+                                        </td>
+
+                                        <!-- Estado -->
                                         <td class="px-0">
                                             @if (empleado.Estado == "Activo")
                                             {
@@ -47,11 +76,38 @@
                                                 <span class="badge bg-danger">Inactivo</span>
                                             }
                                         </td>
+
+                                        <!-- Acciones -->
                                         <td class="px-0 text-end">
-                                            <a asp-action="Edit" asp-route-id="@empleado.Id" class="btn btn-sm btn-warning me-1">
+                                            <!-- Editar datos del empleado -->
+                                            <a asp-action="Edit"
+                                               asp-route-id="@empleado.Id"
+                                               class="btn btn-sm btn-warning me-1"
+                                               title="Editar empleado">
                                                 <i class="ti ti-pencil"></i>
                                             </a>
-                                            <a asp-action="Delete" asp-route-id="@empleado.Id" class="btn btn-sm btn-danger">
+
+                                            <!-- Editar deduccionesbonificaciones fijas -->
+                                            <a asp-action="EditarPlanilla"
+                                            asp-route-id="@empleado.Id"
+                                            class="btn btn-sm btn-outline-secondary me-1 d-inline-flex align-items-center"
+                                            title="Editar deducciones y bonificaciones fijas">
+                                                <i class="ti ti-cash"></i>
+                                            </a>
+
+                                            <!-- Historial de cambios -->
+                                            <a asp-action="HistorialPlanilla"
+                                            asp-route-id="@empleado.Id"
+                                            class="btn btn-sm btn-outline-info me-1"
+                                            title="Ver historial de cambios">
+                                                <i class="ti ti-history"></i>
+                                            </a>
+
+                                            <!-- Eliminar empleado -->
+                                            <a asp-action="Delete"
+                                               asp-route-id="@empleado.Id"
+                                               class="btn btn-sm btn-danger"
+                                               title="Eliminar empleado">
                                                 <i class="ti ti-trash"></i>
                                             </a>
                                         </td>
@@ -60,6 +116,7 @@
                             </tbody>
                         </table>
                     </div>
+
                 </div>
             </div>
         </div>

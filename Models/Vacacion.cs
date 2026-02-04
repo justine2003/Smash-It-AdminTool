@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SGA_Smash.Services;
 
-namespace SGA_Smash.Models;
-
+namespace SGA_Smash.Models
+{
     [Table("Vacacion")]
     public class Vacacion : IValidatableObject
     {
@@ -21,9 +18,8 @@ namespace SGA_Smash.Models;
         [Required, DataType(DataType.Date), Column("fecha_fin")]
         public DateTime FechaFin { get; set; }
 
-        /// Pendiente | Aprobada | Rechazada
         [Required, StringLength(50), Column("estado")]
-        public string Estado { get; set; } = "Pendiente";
+        public string Estado { get; set; } = "Pendiente"; // Pendiente|Aprobada|Rechazada
 
         [Required, Column("dias_solicitados")]
         public int DiasSolicitados { get; set; }
@@ -33,6 +29,9 @@ namespace SGA_Smash.Models;
 
         [Column("aprobado_por")]
         public int? AprobadoPor { get; set; }
+
+        [Column("comentario_admin")]
+        public string? ComentarioAdmin { get; set; }
 
         [ForeignKey(nameof(EmpleadoId))]
         public Empleado? Empleado { get; set; }
@@ -59,15 +58,6 @@ namespace SGA_Smash.Models;
 
             if (Estado == "Aprobada" && AprobadoPor == null)
                 yield return new ValidationResult("Debe indicar quién aprobó la solicitud.", new[] { nameof(AprobadoPor) });
-
-            var policy = validationContext.GetService(typeof(IVacacionPolicyService)) as IVacacionPolicyService;
-            if (policy != null && Estado == "Pendiente")
-            {
-                var (ok, error, _) = policy.ValidarSolicitudAsync(EmpleadoId, FechaInicio, FechaFin).GetAwaiter().GetResult();
-                if (!ok && !string.IsNullOrWhiteSpace(error))
-                    yield return new ValidationResult(error, new[] { nameof(FechaInicio), nameof(FechaFin) });
-            }
         }
     }
-
-
+}
